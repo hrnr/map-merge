@@ -6,8 +6,8 @@ add_compile_options(-std=c++11)
 
 # Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
   pcl_ros
+  roscpp
 )
 
 ################################################
