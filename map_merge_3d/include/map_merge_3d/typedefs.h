@@ -1,6 +1,7 @@
 #ifndef MAP_MERGE_TYPEDEFS_H_
 #define MAP_MERGE_TYPEDEFS_H_
 
+#include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
@@ -25,7 +26,11 @@ typedef pcl::PointCloud<LocalDescriptorT> LocalDescriptors;
 typedef pcl::PointCloud<LocalDescriptorT>::Ptr LocalDescriptorsPtr;
 typedef pcl::PointCloud<LocalDescriptorT>::ConstPtr LocalDescriptorsConstPtr;
 
+// correspondences
+using pcl::Correspondences;
+using pcl::CorrespondencesPtr;
+
 // color handler for visualisation
 typedef pcl::visualization::PointCloudColorHandlerCustom<PointT> ColorHandlerT;
 
-#endif // MAP_MERGE_TYPEDEFS_H_
+#endif  // MAP_MERGE_TYPEDEFS_H_
