@@ -21,7 +21,7 @@ typedef pcl::PointCloud<NormalT>::Ptr SurfaceNormalsPtr;
 typedef pcl::PointCloud<NormalT>::ConstPtr SurfaceNormalsConstPtr;
 
 // local descriptors for registration
-typedef pcl::FPFHSignature33 LocalDescriptorT;
+typedef pcl::PFHSignature125 LocalDescriptorT;
 typedef pcl::PointCloud<LocalDescriptorT> LocalDescriptors;
 typedef pcl::PointCloud<LocalDescriptorT>::Ptr LocalDescriptorsPtr;
 typedef pcl::PointCloud<LocalDescriptorT>::ConstPtr LocalDescriptorsConstPtr;

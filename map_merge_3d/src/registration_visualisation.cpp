@@ -6,6 +6,7 @@
 #include <pcl/common/time.h>
 #include <pcl/console/parse.h>
 #include <pcl/features/fpfh.h>
+#include <pcl/features/pfh.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
@@ -132,7 +133,7 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
                                             const PointCloudPtr &keypoints,
                                             float feature_radius)
 {
-  pcl::FPFHEstimation<PointT, NormalT, LocalDescriptorT> fpfh_estimation;
+  pcl::PFHEstimation<PointT, NormalT, LocalDescriptorT> fpfh_estimation;
   fpfh_estimation.setSearchMethod(
       pcl::search::Search<PointT>::Ptr(new pcl::search::KdTree<PointT>));
   fpfh_estimation.setRadiusSearch(feature_radius);
@@ -273,17 +274,12 @@ int main(int argc, char **argv)
   downSample(cloud1, cloud1, leaf_size);
   downSample(cloud2, cloud2, leaf_size);
 
-  // displayMatch(cloud1, cloud2);
-
-  // PointCloudPtr aligned(new PointCloud);
-  // estimateTransformICP(cloud1, cloud2, aligned);
-
-  // displayMatch(cloud1, aligned);
-  const float min_scale = 0.01;
+  /* detect keypoints */
+  const float min_scale = leaf_size;
   const int nr_octaves = 3;
   const int nr_octaves_per_scale = 3;
   // const float min_contrast = 10.0;
-  const float min_contrast = 15.0;
+  const float min_contrast = 5.0;
 
   PointCloudPtr keypoints1, keypoints2;
   {
@@ -294,6 +290,9 @@ int main(int argc, char **argv)
                                  nr_octaves_per_scale, min_contrast);
   }
 
+  visualiseKeypoints(cloud1, keypoints1);
+
+  /* detect normals */
   float normal_radius = 0.6;
   pcl::console::parse_argument(argc, argv, "--normal_radius", normal_radius);
   float descriptor_radius = 0.8;
@@ -312,11 +311,9 @@ int main(int argc, char **argv)
                                            descriptor_radius);
   }
 
-  visualiseKeypoints(cloud1, keypoints1);
-  // displayKeypoints(cloud2, keypoints2);
-
   visualiseNormals(cloud1, normals1);
 
+  /* compute correspondences */
   CorrespondencesPtr inliers;
   Eigen::Matrix4f transform;
   const double inlier_threshold = leaf_size * 5.;
@@ -341,7 +338,6 @@ int main(int argc, char **argv)
   float max_correspondence_distance = 0.2;
   // float max_correspondence_distance = 0.01;
   const int nr_iterations = 500;
-  // Eigen::Matrix4f transform;
   {
     pcl::ScopeTime t("initial alignment");
     transform = computeInitialAlignment(
@@ -357,12 +353,6 @@ int main(int argc, char **argv)
   float outlier_rejection_threshold = 0.05;
   float transformation_epsilon = 0;
   int max_iterations = 200;
-
-  // transform = refineAlignment(
-  //     cloud1, cloud2, transform, max_correspondence_distance,
-  //     outlier_rejection_threshold, transformation_epsilon, max_iterations);
-  // pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
-  // displayMatch(cloud1_aligned, cloud2);
 
   PointCloudPtr aligned(new PointCloud);
   {
