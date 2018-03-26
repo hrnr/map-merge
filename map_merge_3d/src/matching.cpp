@@ -15,27 +15,45 @@ findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
   // Use a KdTree to search for the nearest matches in feature space
   pcl::KdTreeFLANN<LocalDescriptorT> target_search;
   target_search.setInputCloud(target_descriptors);
+  target_search.setSortedResults(true);
 
   pcl::KdTreeFLANN<LocalDescriptorT> source_search;
   source_search.setInputCloud(source_descriptors);
+  source_search.setSortedResults(true);
 
   // storing nearest k search result
-  const int k = 1;
+  const int k = 5;
+  // forward search results
   std::vector<int> k_indices(k);
   std::vector<float> k_squared_distances(k);
+  // backward search results
+  std::vector<int> k_indices_back(k);
+  std::vector<float> k_squared_distances_back(k);
 
   for (size_t i = 0; i < source_descriptors->size(); ++i) {
     // source to target match
     target_search.nearestKSearch(*source_descriptors, int(i), k, k_indices,
                                  k_squared_distances);
-    int match = k_indices[0];
-    float dist = k_squared_distances[0];
-    // target to source match
-    source_search.nearestKSearch(*target_descriptors, match, k, k_indices,
-                                 k_squared_distances);
-    if (k_indices[0] == int(i)) {
-      // we have cross match
-      result->emplace_back(i, match, dist);
+    // try to cross-match all k source to target matches
+    for (size_t j = 0; j < k; ++j) {
+      int match = k_indices[j];
+      float dist = k_squared_distances[j];
+      // target to source match
+      source_search.nearestKSearch(*target_descriptors, match, k,
+                                   k_indices_back, k_squared_distances_back);
+      // seach for original index in back-matches
+      for (int back_i : k_indices_back) {
+        if (back_i == int(i)) {
+          // we have cross match
+          result->emplace_back(i, match, dist);
+
+          /* we stop here. pcl::SampleConsensusModelRegistration can not handle
+           * multiple matches per point. The current match should already be the
+           * best as the results are sorted. */
+          j = k;  // stop back matching
+          break;
+        }
+      }
     }
   }
   std::cout << "findFeatureCorrespondences cross-matches: " << result->size()
