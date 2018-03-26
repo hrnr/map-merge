@@ -6,7 +6,8 @@
 void visualisePointClouds(PointCloudPtr cloud1, PointCloudPtr cloud2);
 void visualiseCorrespondences(PointCloudPtr cloud1, PointCloudPtr keypoints1,
                               PointCloudPtr cloud2, PointCloudPtr keypoints2,
-                              CorrespondencesPtr correspondences);
+                              CorrespondencesPtr correspondences,
+                              bool show_keypoints = false);
 void visualisePointCloud(PointCloudPtr cloud);
 void visualiseNormals(PointCloudPtr cloud, SurfaceNormalsPtr normals);
 void visualiseKeypoints(PointCloudPtr cloud, PointCloudPtr keypoints);

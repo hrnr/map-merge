@@ -5,7 +5,8 @@
 // use just one instance of vis to overcome bug PCL #172
 static pcl::visualization::PCLVisualizer vis("cloud view");
 
-static void show() {
+static void show()
+{
   vis.spin();
   vis.removeCorrespondences();
   vis.removeAllPointClouds();
@@ -64,7 +65,8 @@ void visualiseKeypoints(PointCloudPtr cloud, PointCloudPtr keypoints)
 
 void visualiseCorrespondences(PointCloudPtr cloud1, PointCloudPtr keypoints1,
                               PointCloudPtr cloud2, PointCloudPtr keypoints2,
-                              CorrespondencesPtr correspondences)
+                              CorrespondencesPtr correspondences,
+                              bool show_keypoints)
 {
   std::cout << "displaying pointclouds of sizes: " << cloud1->size() << ", "
             << cloud2->size() << std::endl;
@@ -77,7 +79,22 @@ void visualiseCorrespondences(PointCloudPtr cloud1, PointCloudPtr keypoints1,
   ColorHandlerT blue(cloud2, 0.0, 0.0, 255.0);
   vis.addPointCloud(cloud2, blue, "cloud2");
 
-  vis.addCorrespondences<PointT>(keypoints1, keypoints2, *correspondences);
+  vis.addCorrespondences<PointT>(keypoints1, keypoints2, *correspondences,
+                                 "correspondences");
+  vis.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH,
+                                  5, "correspondences");
+
+  if (show_keypoints) {
+    ColorHandlerT red(keypoints1, 255, 0, 0);
+    vis.addPointCloud(keypoints1, red, "keypoints1");
+    vis.setPointCloudRenderingProperties(
+        pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "keypoints1");
+
+    ColorHandlerT yellow(keypoints2, 255, 255, 0);
+    vis.addPointCloud(keypoints2, yellow, "keypoints2");
+    vis.setPointCloudRenderingProperties(
+        pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "keypoints2");
+  }
 
   show();
 }

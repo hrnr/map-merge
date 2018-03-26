@@ -4,6 +4,7 @@
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
 #include <pcl/registration/transformation_estimation_svd.h>
 
+// matches reciprocal correspondences among k-nearest matches
 CorrespondencesPtr
 findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
                            const LocalDescriptorsPtr &target_descriptors)
