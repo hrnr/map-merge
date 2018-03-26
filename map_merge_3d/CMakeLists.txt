@@ -34,6 +34,7 @@ add_executable(registration_visualisation
   src/registration_visualisation.cpp
   src/visualise.cpp
   src/matching.cpp
+  src/features.cpp
 )
 add_dependencies(registration_visualisation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(registration_visualisation
