@@ -5,6 +5,9 @@
 
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
 
+PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
+                             int min_neighbours);
+
 /**
  * @brief Use SIFTKeypoint to detect a set of keypoints
  *

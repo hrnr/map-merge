@@ -65,8 +65,6 @@ Eigen::Matrix4f refineAlignment(const PointCloudPtr &source_points,
   return (icp.getFinalTransformation() * initial_alignment);
 }
 
-
-
 /* Use SampleConsensusInitialAlignment to find a rough alignment from the source
  * cloud to the target cloud by finding
  * correspondences between two sets of local features
@@ -148,55 +146,61 @@ void estimateTransformICP(PointCloudPtr cloud1, PointCloudPtr cloud2,
 
 int main(int argc, char **argv)
 {
+  double resolution = 0.1;
+  int min_neighbours = 50;
+  const int nr_octaves = 3;
+  const int nr_octaves_per_scale = 3;
+  const double min_contrast = 5.0;
+  double normal_radius = resolution * 6.;
+  double descriptor_radius = resolution * 8.;
+  double filtering_radius = resolution * 2.;
+  const double inlier_threshold = resolution * 5.;
+  const double max_correspondence_distance = inlier_threshold * 2.;
+  const int nr_iterations = 1000;
+  const int max_iterations = 200;
+
+  pcl::console::parse_argument(argc, argv, "--normal_radius", normal_radius);
+  pcl::console::parse_argument(argc, argv, "--descriptor_radius",
+                               descriptor_radius);
+  pcl::console::parse_argument(argc, argv, "--resolution", resolution);
+  pcl::console::parse_argument(argc, argv, "--min_neighbours", min_neighbours);
+  pcl::console::parse_argument(argc, argv, "--filtering_radius", filtering_radius);
+
+
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
-  PointCloudPtr cloud1_orig(new PointCloud);
-  PointCloudPtr cloud2_orig(new PointCloud);
-  // Get input object and scene
-  // if (argc >= 3) {
-  //   pcl::console::print_error("Syntax is: %s object.pcd scene.pcd\n",
-  //   argv[0]);
-  //   return (1);
-  // }
 
   // Load object and scene
-  pcl::console::print_highlight("Loading point clouds...\n");
   if (pcl::io::loadPCDFile<PointT>(argv[1], *cloud1) < 0 ||
       pcl::io::loadPCDFile<PointT>(argv[2], *cloud2) < 0) {
     pcl::console::print_error("Error loading object/scene file!\n");
     return (1);
   }
-
-  double resolution = 0.1;
-  pcl::console::parse_argument(argc, argv, "--resolution", resolution);
+  pcl::console::print_highlight("Pointclouds loaded.\n");
 
   cloud1 = downSample(cloud1, resolution);
   cloud2 = downSample(cloud2, resolution);
 
-  /* detect keypoints */
-  const double min_scale = resolution;
-  const int nr_octaves = 3;
-  const int nr_octaves_per_scale = 3;
-  const double min_contrast = 5.0;
+  visualisePointCloud(cloud1);
 
+  cloud1 = removeOutliers(cloud1, descriptor_radius, min_neighbours);
+  cloud2 = removeOutliers(cloud2, descriptor_radius, min_neighbours);
+
+  visualisePointCloud(cloud1);
+
+  /* detect keypoints */
   PointCloudPtr keypoints1, keypoints2;
   {
     pcl::ScopeTime t("feature detection");
-    keypoints1 = detectKeypoints(cloud1, min_scale, nr_octaves,
+    keypoints1 = detectKeypoints(cloud1, resolution, nr_octaves,
                                  nr_octaves_per_scale, min_contrast);
-    keypoints2 = detectKeypoints(cloud2, min_scale, nr_octaves,
+    keypoints2 = detectKeypoints(cloud2, resolution, nr_octaves,
                                  nr_octaves_per_scale, min_contrast);
   }
 
   visualiseKeypoints(cloud1, keypoints1);
 
-  /* detect normals */
-  double normal_radius = resolution * 6.;
-  pcl::console::parse_argument(argc, argv, "--normal_radius", normal_radius);
-  double descriptor_radius = resolution * 8.;
-  pcl::console::parse_argument(argc, argv, "--descriptor_radius",
-                               descriptor_radius);
-
+  /* compute descriptors */
   LocalDescriptorsPtr descriptors1, descriptors2;
   SurfaceNormalsPtr normals1, normals2;
   {
@@ -214,7 +218,6 @@ int main(int argc, char **argv)
   /* compute correspondences */
   CorrespondencesPtr inliers;
   Eigen::Matrix4f transform;
-  const double inlier_threshold = resolution * 5.;
 
   {
     pcl::ScopeTime t("finding correspondences");
@@ -231,8 +234,6 @@ int main(int argc, char **argv)
   pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
   visualisePointClouds(cloud1_aligned, cloud2);
 
-  const double max_correspondence_distance = inlier_threshold * 2;
-  const int nr_iterations = 500;
   {
     pcl::ScopeTime t("initial alignment");
     transform = computeInitialAlignment(
@@ -243,8 +244,6 @@ int main(int argc, char **argv)
   // Transform the source point to align them with the target points
   pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
   visualisePointClouds(cloud1_aligned, cloud2);
-
-  int max_iterations = 200;
 
   PointCloudPtr aligned(new PointCloud);
   {

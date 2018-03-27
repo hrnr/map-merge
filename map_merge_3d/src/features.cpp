@@ -2,6 +2,7 @@
 
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/pfh.h>
+#include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/keypoints/sift_keypoint.h>
 
@@ -10,6 +11,22 @@ PointCloudPtr downSample(const PointCloudPtr &input, double resolution)
   pcl::VoxelGrid<PointT> filter;
   filter.setLeafSize(float(resolution), float(resolution), float(resolution));
   filter.setInputCloud(input);
+
+  PointCloudPtr output(new PointCloud);
+  filter.filter(*output);
+
+  return output;
+}
+
+/* Use a RadiusOutlierRemoval filter to remove all points with too few local
+ * neighbors */
+PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
+                             int min_neighbors)
+{
+  pcl::RadiusOutlierRemoval<PointT> filter;
+  filter.setInputCloud(input);
+  filter.setRadiusSearch(radius);
+  filter.setMinNeighborsInRadius(min_neighbors);
 
   PointCloudPtr output(new PointCloud);
   filter.filter(*output);
