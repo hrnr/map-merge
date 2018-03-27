@@ -1,5 +1,6 @@
 #include <map_merge_3d/features.h>
 
+#include <pcl/conversions.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/pfh.h>
 #include <pcl/filters/radius_outlier_removal.h>
@@ -52,21 +53,40 @@ PointCloudPtr detectKeypoints(const PointCloudPtr &points, double min_scale,
   return keypoints;
 }
 
+/* implementation for specific descriptor type  */
+template <template<typename,typename,typename> class DescriptorExtractor, typename DescriptorT>
 LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
                                             const SurfaceNormalsPtr &normals,
                                             const PointCloudPtr &keypoints,
                                             double feature_radius)
 {
-  pcl::PFHEstimation<PointT, NormalT, LocalDescriptorT> descriptor;
+  DescriptorExtractor<PointT, NormalT, DescriptorT> descriptor;
   descriptor.setRadiusSearch(feature_radius);
   descriptor.setSearchSurface(points);
   descriptor.setInputNormals(normals);
   descriptor.setInputCloud(keypoints);
 
-  LocalDescriptorsPtr local_descriptors(new LocalDescriptors);
-  descriptor.compute(*local_descriptors);
+  pcl::PointCloud<DescriptorT> descriptors;
+  descriptor.compute(descriptors);
 
-  return local_descriptors;
+  // convert to PointCloud2 which is able to hold any descriptors data
+  LocalDescriptorsPtr result(new LocalDescriptors);
+  pcl::toPCLPointCloud2(descriptors, *result);
+
+  return result;
+}
+
+LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
+                                            const SurfaceNormalsPtr &normals,
+                                            const PointCloudPtr &keypoints,
+                                            Descriptor descriptor,
+                                            double feature_radius)
+{
+  switch (descriptor) {
+    case Descriptor::PFH:
+      return computeLocalDescriptors<pcl::PFHEstimation, pcl::PFHSignature125>(
+          points, normals, keypoints, feature_radius);
+  }
 }
 
 SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,

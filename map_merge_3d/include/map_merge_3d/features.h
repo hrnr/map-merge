@@ -3,6 +3,10 @@
 
 #include <map_merge_3d/typedefs.h>
 
+enum class Descriptor {
+  PFH,
+};
+
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
 
 PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
@@ -37,6 +41,7 @@ PointCloudPtr detectKeypoints(const PointCloudPtr &points, double min_scale,
 LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
                                             const SurfaceNormalsPtr &normals,
                                             const PointCloudPtr &keypoints,
+                                            Descriptor descriptor,
                                             double feature_radius);
 
 /**

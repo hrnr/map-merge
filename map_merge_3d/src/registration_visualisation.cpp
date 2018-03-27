@@ -7,7 +7,6 @@
 #include <pcl/common/time.h>
 #include <pcl/console/parse.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/registration/ia_ransac.h>
 #include <pcl/registration/icp.h>
 
 /* Use IterativeClosestPoint to find a precise alignment from the source cloud
@@ -65,58 +64,6 @@ Eigen::Matrix4f refineAlignment(const PointCloudPtr &source_points,
   return (icp.getFinalTransformation() * initial_alignment);
 }
 
-/* Use SampleConsensusInitialAlignment to find a rough alignment from the source
- * cloud to the target cloud by finding
- * correspondences between two sets of local features
- * Inputs:
- *   source_points
- *     The "source" points, i.e., the points that must be transformed to align
- * with the target point cloud
- *   source_descriptors
- *     The local descriptors for each source point
- *   target_points
- *     The "target" points, i.e., the points to which the source point cloud
- * will be aligned
- *   target_descriptors
- *     The local descriptors for each target point
- *   min_sample_distance
- *     The minimum distance between any two random samples
- *   max_correspondence_distance
- *     The
- *   nr_interations
- *     The number of RANSAC iterations to perform
- * Return: A transformation matrix that will roughly align the points in source
- * to the points in target
- */
-Eigen::Matrix4f computeInitialAlignment(
-    const PointCloudPtr &source_points,
-    const LocalDescriptorsPtr &source_descriptors,
-    const PointCloudPtr &target_points,
-    const LocalDescriptorsPtr &target_descriptors, double min_sample_distance,
-    double max_correspondence_distance, int nr_iterations)
-{
-  pcl::SampleConsensusInitialAlignment<PointT, PointT, LocalDescriptorT> sac_ia;
-  sac_ia.setMinSampleDistance(min_sample_distance);
-  sac_ia.setMaxCorrespondenceDistance(max_correspondence_distance);
-  sac_ia.setMaximumIterations(nr_iterations);
-
-  sac_ia.setInputSource(source_points);
-  sac_ia.setSourceFeatures(source_descriptors);
-
-  sac_ia.setInputTarget(target_points);
-  sac_ia.setTargetFeatures(target_descriptors);
-
-  PointCloud registration_output;
-  sac_ia.align(registration_output);
-
-  std::cout << "initial alignment converged:" << sac_ia.hasConverged()
-            << std::endl;
-  std::cout << "initial alignment score:" << sac_ia.getFitnessScore()
-            << std::endl;
-
-  return (sac_ia.getFinalTransformation());
-}
-
 void estimateTransformICP(PointCloudPtr cloud1, PointCloudPtr cloud2,
                           PointCloudPtr output, int max_iterations,
                           double max_correspondence_distance)
@@ -144,6 +91,30 @@ void estimateTransformICP(PointCloudPtr cloud1, PointCloudPtr cloud2,
   }
 }
 
+void printPointCloud2Summary(const pcl::PCLPointCloud2 &v)
+{
+  std::cout << "header: " << std::endl;
+  std::cout << v.header;
+  std::cout << "height: ";
+  std::cout << "  " << v.height << std::endl;
+  std::cout << "width: ";
+  std::cout << "  " << v.width << std::endl;
+  std::cout << "fields[]" << std::endl;
+  for (size_t i = 0; i < v.fields.size(); ++i) {
+    std::cout << "  fields[" << i << "]: ";
+    std::cout << std::endl;
+    std::cout << "    " << v.fields[i] << std::endl;
+  }
+  std::cout << "is_bigendian: ";
+  std::cout << "  " << v.is_bigendian << std::endl;
+  std::cout << "point_step: ";
+  std::cout << "  " << v.point_step << std::endl;
+  std::cout << "row_step: ";
+  std::cout << "  " << v.row_step << std::endl;
+  std::cout << "is_dense: ";
+  std::cout << "  " << v.is_dense << std::endl;
+}
+
 int main(int argc, char **argv)
 {
   double resolution = 0.1;
@@ -164,8 +135,8 @@ int main(int argc, char **argv)
                                descriptor_radius);
   pcl::console::parse_argument(argc, argv, "--resolution", resolution);
   pcl::console::parse_argument(argc, argv, "--min_neighbours", min_neighbours);
-  pcl::console::parse_argument(argc, argv, "--filtering_radius", filtering_radius);
-
+  pcl::console::parse_argument(argc, argv, "--filtering_radius",
+                               filtering_radius);
 
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
@@ -207,11 +178,14 @@ int main(int argc, char **argv)
     pcl::ScopeTime t("descriptors computation");
     normals1 = computeSurfaceNormals(cloud1, normal_radius);
     descriptors1 = computeLocalDescriptors(cloud1, normals1, keypoints1,
-                                           descriptor_radius);
+                                           Descriptor::PFH, descriptor_radius);
     normals2 = computeSurfaceNormals(cloud2, normal_radius);
     descriptors2 = computeLocalDescriptors(cloud2, normals2, keypoints2,
-                                           descriptor_radius);
+                                           Descriptor::PFH, descriptor_radius);
   }
+
+  std::cout << "extracted descriptors:" << std::endl;
+  printPointCloud2Summary(*descriptors1);
 
   visualiseNormals(cloud1, normals1);
 
@@ -236,7 +210,7 @@ int main(int argc, char **argv)
 
   {
     pcl::ScopeTime t("initial alignment");
-    transform = computeInitialAlignment(
+    transform = estimateTransformFromDescriptorsSets(
         keypoints1, descriptors1, keypoints2, descriptors2, inlier_threshold,
         max_correspondence_distance, nr_iterations);
   }

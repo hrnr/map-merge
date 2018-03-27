@@ -1,6 +1,7 @@
 #ifndef MAP_MERGE_TYPEDEFS_H_
 #define MAP_MERGE_TYPEDEFS_H_
 
+#include <pcl/PCLPointCloud2.h>
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -21,10 +22,9 @@ typedef pcl::PointCloud<NormalT>::Ptr SurfaceNormalsPtr;
 typedef pcl::PointCloud<NormalT>::ConstPtr SurfaceNormalsConstPtr;
 
 // local descriptors for registration
-typedef pcl::PFHSignature125 LocalDescriptorT;
-typedef pcl::PointCloud<LocalDescriptorT> LocalDescriptors;
-typedef pcl::PointCloud<LocalDescriptorT>::Ptr LocalDescriptorsPtr;
-typedef pcl::PointCloud<LocalDescriptorT>::ConstPtr LocalDescriptorsConstPtr;
+typedef pcl::PCLPointCloud2 LocalDescriptors;
+typedef pcl::PCLPointCloud2::Ptr LocalDescriptorsPtr;
+typedef pcl::PCLPointCloud2::ConstPtr LocalDescriptorsConstPtr;
 
 // correspondences
 using pcl::Correspondences;

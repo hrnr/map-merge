@@ -1,23 +1,35 @@
 #include <map_merge_3d/matching.h>
 
-#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/conversions.h>
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
+#include <pcl/registration/ia_ransac.h>
 #include <pcl/registration/transformation_estimation_svd.h>
+#include <pcl/search/kdtree.h>
 
 // matches reciprocal correspondences among k-nearest matches
+template <typename DescriptorT>
 CorrespondencesPtr
-findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
-                           const LocalDescriptorsPtr &target_descriptors)
+findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors_,
+                           const LocalDescriptorsPtr &target_descriptors_)
 {
+  typedef pcl::PointCloud<DescriptorT> DescriptorsPointCLoud1;
+
+  typename DescriptorsPointCLoud1::Ptr source_descriptors(
+      new DescriptorsPointCLoud1);
+  pcl::fromPCLPointCloud2(*source_descriptors_, *source_descriptors);
+  typename DescriptorsPointCLoud1::Ptr target_descriptors(
+      new DescriptorsPointCLoud1);
+  pcl::fromPCLPointCloud2(*target_descriptors_, *target_descriptors);
+
   CorrespondencesPtr result(new Correspondences);
   result->reserve(source_descriptors->size());
 
   // Use a KdTree to search for the nearest matches in feature space
-  pcl::KdTreeFLANN<LocalDescriptorT> target_search;
+  pcl::search::KdTree<DescriptorT> target_search;
   target_search.setInputCloud(target_descriptors);
   target_search.setSortedResults(true);
 
-  pcl::KdTreeFLANN<LocalDescriptorT> source_search;
+  pcl::search::KdTree<DescriptorT> source_search;
   source_search.setInputCloud(source_descriptors);
   source_search.setSortedResults(true);
 
@@ -62,6 +74,28 @@ findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
   return result;
 }
 
+// matches reciprocal correspondences among k-nearest matches
+CorrespondencesPtr
+findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
+                           const LocalDescriptorsPtr &target_descriptors)
+{
+  if (source_descriptors->fields.size() != 1 ||
+      target_descriptors->fields.size() != 1) {
+    throw std::runtime_error("findFeatureCorrespondences: descriptors must "
+                             "contain exactly one field with descritors.");
+  }
+
+  auto name = source_descriptors->fields[0].name;
+
+  if (name == "pfh") {
+    return findFeatureCorrespondences<pcl::PFHSignature125>(source_descriptors,
+                                                            target_descriptors);
+  }
+
+  throw std::runtime_error("findFeatureCorrespondences: unknown descriptor "
+                           "type.");
+}
+
 Eigen::Matrix4f estimateTransformFromCorrespondences(
     const PointCloudPtr &source_keypoints,
     const PointCloudPtr &target_keypoints,
@@ -103,4 +137,70 @@ Eigen::Matrix4f estimateTransformFromCorrespondences(
             << inliers->size() << std::endl;
 
   return result;
+}
+
+template <typename DescriptorT>
+Eigen::Matrix4f estimateTransformFromDescriptorsSets(
+    const PointCloudPtr &source_keypoints,
+    const LocalDescriptorsPtr &source_descriptors_,
+    const PointCloudPtr &target_keypoints,
+    const LocalDescriptorsPtr &target_descriptors_, double min_sample_distance,
+    double max_correspondence_distance, int max_iterations)
+{
+  // convert to required PointCloudType
+  typedef pcl::PointCloud<DescriptorT> DescriptorsPointCLoud1;
+  typename DescriptorsPointCLoud1::Ptr source_descriptors(
+      new DescriptorsPointCLoud1);
+  pcl::fromPCLPointCloud2(*source_descriptors_, *source_descriptors);
+  typename DescriptorsPointCLoud1::Ptr target_descriptors(
+      new DescriptorsPointCLoud1);
+  pcl::fromPCLPointCloud2(*target_descriptors_, *target_descriptors);
+
+  pcl::SampleConsensusInitialAlignment<PointT, PointT, DescriptorT> estimator;
+  estimator.setMinSampleDistance(min_sample_distance);
+  estimator.setMaxCorrespondenceDistance(max_correspondence_distance);
+  estimator.setMaximumIterations(max_iterations);
+
+  estimator.setInputSource(source_keypoints);
+  estimator.setSourceFeatures(source_descriptors);
+
+  estimator.setInputTarget(target_keypoints);
+  estimator.setTargetFeatures(target_descriptors);
+
+  PointCloud registration_output;
+  estimator.align(registration_output);
+
+  std::cout << "initial alignment converged:" << estimator.hasConverged()
+            << std::endl;
+  std::cout << "initial alignment score:" << estimator.getFitnessScore()
+            << std::endl;
+
+  return (estimator.getFinalTransformation());
+}
+
+Eigen::Matrix4f estimateTransformFromDescriptorsSets(
+    const PointCloudPtr &source_keypoints,
+    const LocalDescriptorsPtr &source_descriptors,
+    const PointCloudPtr &target_keypoints,
+    const LocalDescriptorsPtr &target_descriptors, double min_sample_distance,
+    double max_correspondence_distance, int max_iterations)
+{
+  if (source_descriptors->fields.size() != 1 ||
+      target_descriptors->fields.size() != 1) {
+    throw std::runtime_error("estimateTransformFromDescriptorsSets: "
+                             "descriptors must contain exactly one field with "
+                             "descritors.");
+  }
+
+  auto name = source_descriptors->fields[0].name;
+
+  if (name == "pfh") {
+    return estimateTransformFromDescriptorsSets<pcl::PFHSignature125>(
+        source_keypoints, source_descriptors, target_keypoints,
+        target_descriptors, min_sample_distance, max_correspondence_distance,
+        max_iterations);
+  }
+
+  throw std::runtime_error("estimateTransformFromDescriptorsSets: unknown "
+                           "descriptor type.");
 }
