@@ -34,4 +34,32 @@ Eigen::Matrix4f estimateTransformFromDescriptorsSets(
     const LocalDescriptorsPtr &target_descriptors, double min_sample_distance,
     double max_correspondence_distance, int max_iterations);
 
+/**
+ * @brief Use ICP to estimate transform between grids
+ *
+ * @param source_points source point cloud
+ * @param target_points target point cloud. Source point cloud will be aligned
+ * to this one.
+ * @param initial_guess Initial transfromation to start from
+ *
+ * @param max_correspondence_distance A threshold on the distance between any
+ * two corresponding points.  Any corresponding points that are further apart
+ * than this threshold will be ignored when computing the source-to-target
+ * transformation
+ * @param outlier_rejection_threshold A threshold used to define outliers during
+ * RANSAC
+ * @param max_iterations maximum iterations for RANSAC
+ * @param transformation_epsilon The smallest iterative transformation allowed
+ * before the algorithm is considered to have converged
+ *
+ * @return estiamted transformation between two grids.
+ */
+Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
+                                     const PointCloudPtr &target_points,
+                                     const Eigen::Matrix4f &initial_guess,
+                                     double max_correspondence_distance,
+                                     double outlier_rejection_threshold,
+                                     int max_iterations = 100,
+                                     double transformation_epsilon = 0.0);
+
 #endif  // MAP_MERGE_MATCHING_H_

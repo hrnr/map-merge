@@ -5,91 +5,9 @@
 #include <map_merge_3d/visualise.h>
 
 #include <pcl/common/time.h>
+#include <pcl/common/transforms.h>
 #include <pcl/console/parse.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/registration/icp.h>
-
-/* Use IterativeClosestPoint to find a precise alignment from the source cloud
- * to the target cloud,
- * starting with an intial guess
- * Inputs:
- *   source_points
- *     The "source" points, i.e., the points that must be transformed to align
- * with the target point cloud
- *   target_points
- *     The "target" points, i.e., the points to which the source point cloud
- * will be aligned
- *   intial_alignment
- *     An initial estimate of the transformation matrix that aligns the source
- * points to the target points
- *   max_correspondence_distance
- *     A threshold on the distance between any two corresponding points.  Any
- * corresponding points that are further
- *     apart than this threshold will be ignored when computing the
- * source-to-target transformation
- *   outlier_rejection_threshold
- *     A threshold used to define outliers during RANSAC outlier rejection
- *   transformation_epsilon
- *     The smallest iterative transformation allowed before the algorithm is
- * considered to have converged
- *   max_iterations
- *     The maximum number of ICP iterations to perform
- * Return: A transformation matrix that will precisely align the points in
- * source to the points in target
- */
-Eigen::Matrix4f refineAlignment(const PointCloudPtr &source_points,
-                                const PointCloudPtr &target_points,
-                                const Eigen::Matrix4f &initial_alignment,
-                                float max_correspondence_distance,
-                                float outlier_rejection_threshold,
-                                float transformation_epsilon,
-                                float max_iterations)
-{
-  pcl::IterativeClosestPoint<PointT, PointT> icp;
-  icp.setMaxCorrespondenceDistance(max_correspondence_distance);
-  icp.setRANSACOutlierRejectionThreshold(outlier_rejection_threshold);
-  icp.setTransformationEpsilon(transformation_epsilon);
-  icp.setMaximumIterations(max_iterations);
-
-  PointCloudPtr source_points_transformed(new PointCloud);
-  pcl::transformPointCloud(*source_points, *source_points_transformed,
-                           initial_alignment);
-
-  icp.setInputCloud(source_points_transformed);
-  icp.setInputTarget(target_points);
-
-  PointCloud registration_output;
-  icp.align(registration_output);
-
-  return (icp.getFinalTransformation() * initial_alignment);
-}
-
-void estimateTransformICP(PointCloudPtr cloud1, PointCloudPtr cloud2,
-                          PointCloudPtr output, int max_iterations,
-                          double max_correspondence_distance)
-{
-  pcl::IterativeClosestPoint<PointT, PointT> icp;
-  icp.setInputTarget(cloud1);
-  icp.setInputSource(cloud2);
-  icp.setMaxCorrespondenceDistance(max_correspondence_distance * 2);
-  icp.setRANSACOutlierRejectionThreshold(max_correspondence_distance);
-  icp.setMaximumIterations(max_iterations);
-  icp.setTransformationEpsilon(1e-8);
-
-  if (!output) {
-    output = PointCloudPtr(new PointCloud);
-  }
-  icp.align(*output);
-
-  std::cout << "Final transformation: " << std::endl
-            << icp.getFinalTransformation() << std::endl;
-  if (icp.hasConverged()) {
-    std::cout << "ICP converged." << std::endl
-              << "The score is " << icp.getFitnessScore() << std::endl;
-  } else {
-    std::cout << "ICP did not converge.";
-  }
-}
 
 void printPointCloud2Summary(const pcl::PCLPointCloud2 &v)
 {
@@ -222,10 +140,12 @@ int main(int argc, char **argv)
   PointCloudPtr aligned(new PointCloud);
   {
     pcl::ScopeTime t("ICP alignment");
-    estimateTransformICP(cloud1_aligned, cloud2, aligned, max_iterations,
-                         inlier_threshold);
+    transform = estimateTransformICP(cloud1, cloud2, transform,
+                                     max_correspondence_distance,
+                                     inlier_threshold, max_iterations, 1e-3);
   }
-  visualisePointClouds(cloud1_aligned, aligned);
+  pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
+  visualisePointClouds(cloud1_aligned, cloud2);
 
   return 0;
 }

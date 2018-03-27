@@ -3,6 +3,7 @@
 #include <pcl/conversions.h>
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
 #include <pcl/registration/ia_ransac.h>
+#include <pcl/registration/icp.h>
 #include <pcl/registration/transformation_estimation_svd.h>
 #include <pcl/search/kdtree.h>
 
@@ -203,4 +204,40 @@ Eigen::Matrix4f estimateTransformFromDescriptorsSets(
 
   throw std::runtime_error("estimateTransformFromDescriptorsSets: unknown "
                            "descriptor type.");
+}
+
+Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
+                                     const PointCloudPtr &target_points,
+                                     const Eigen::Matrix4f &initial_guess,
+                                     double max_correspondence_distance,
+                                     double outlier_rejection_threshold,
+                                     int max_iterations,
+                                     double transformation_epsilon)
+{
+  pcl::IterativeClosestPoint<PointT, PointT> icp;
+  icp.setMaxCorrespondenceDistance(max_correspondence_distance);
+  icp.setRANSACOutlierRejectionThreshold(outlier_rejection_threshold);
+  icp.setTransformationEpsilon(transformation_epsilon);
+  icp.setMaximumIterations(max_iterations);
+
+  PointCloudPtr source_points_transformed(new PointCloud);
+  pcl::transformPointCloud(*source_points, *source_points_transformed,
+                           initial_guess);
+
+  icp.setInputSource(source_points_transformed);
+  icp.setInputTarget(target_points);
+
+  PointCloud registration_output;
+  icp.align(registration_output);
+
+  std::cout << "ICP final transformation: " << std::endl
+            << icp.getFinalTransformation() << std::endl;
+  if (icp.hasConverged()) {
+    std::cout << "ICP converged." << std::endl
+              << "The score is " << icp.getFitnessScore() << std::endl;
+  } else {
+    std::cout << "ICP did not converge.";
+  }
+
+  return (icp.getFinalTransformation() * initial_guess);
 }
