@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(map_merge_3d)
 
-# C++11 is supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# C++14 should be de facto supported in ROS Lunar and newer
+# we need C++14 for templated lambdas
+add_compile_options(-std=c++14)
 
 # Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS

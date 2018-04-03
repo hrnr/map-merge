@@ -3,9 +3,7 @@
 
 #include <map_merge_3d/typedefs.h>
 
-enum class Descriptor {
-  PFH,
-};
+enum class Descriptor { PFH };
 
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
 

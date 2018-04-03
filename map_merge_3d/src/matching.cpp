@@ -1,3 +1,4 @@
+#include <map_merge_3d/dispatch.h>
 #include <map_merge_3d/matching.h>
 
 #include <pcl/conversions.h>
@@ -6,6 +7,22 @@
 #include <pcl/registration/icp.h>
 #include <pcl/registration/transformation_estimation_svd.h>
 #include <pcl/search/kdtree.h>
+
+/**
+ * @brief Throws an exception if inputs are not containing valid descriptors set
+ * for matching
+ *
+ */
+static inline void
+assertDescriptorsPair(const LocalDescriptorsPtr &source_descriptors,
+                      const LocalDescriptorsPtr &target_descriptors)
+{
+  if (source_descriptors->fields.size() != 1 ||
+      target_descriptors->fields.size() != 1) {
+    throw std::runtime_error("descriptors must contain exactly one field with "
+                             "descriptors.");
+  }
+}
 
 // matches reciprocal correspondences among k-nearest matches
 template <typename DescriptorT>
@@ -80,21 +97,15 @@ CorrespondencesPtr
 findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
                            const LocalDescriptorsPtr &target_descriptors)
 {
-  if (source_descriptors->fields.size() != 1 ||
-      target_descriptors->fields.size() != 1) {
-    throw std::runtime_error("findFeatureCorrespondences: descriptors must "
-                             "contain exactly one field with descritors.");
-  }
+  assertDescriptorsPair(source_descriptors, target_descriptors);
 
-  auto name = source_descriptors->fields[0].name;
-
-  if (name == "pfh") {
-    return findFeatureCorrespondences<pcl::PFHSignature125>(source_descriptors,
-                                                            target_descriptors);
-  }
-
-  throw std::runtime_error("findFeatureCorrespondences: unknown descriptor "
-                           "type.");
+  const std::string &name = source_descriptors->fields[0].name;
+  auto functor = [&](auto descriptor_type) {
+    return findFeatureCorrespondences<typename decltype(
+        descriptor_type)::PointType>(source_descriptors, target_descriptors);
+  };
+  return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
+      name, functor);
 }
 
 Eigen::Matrix4f estimateTransformFromCorrespondences(
@@ -186,24 +197,18 @@ Eigen::Matrix4f estimateTransformFromDescriptorsSets(
     const LocalDescriptorsPtr &target_descriptors, double min_sample_distance,
     double max_correspondence_distance, int max_iterations)
 {
-  if (source_descriptors->fields.size() != 1 ||
-      target_descriptors->fields.size() != 1) {
-    throw std::runtime_error("estimateTransformFromDescriptorsSets: "
-                             "descriptors must contain exactly one field with "
-                             "descritors.");
-  }
+  assertDescriptorsPair(source_descriptors, target_descriptors);
 
-  auto name = source_descriptors->fields[0].name;
-
-  if (name == "pfh") {
-    return estimateTransformFromDescriptorsSets<pcl::PFHSignature125>(
+  const std::string &name = source_descriptors->fields[0].name;
+  auto functor = [&](auto descriptor_type) {
+    return estimateTransformFromDescriptorsSets<typename decltype(
+        descriptor_type)::PointType>(
         source_keypoints, source_descriptors, target_keypoints,
         target_descriptors, min_sample_distance, max_correspondence_distance,
         max_iterations);
-  }
-
-  throw std::runtime_error("estimateTransformFromDescriptorsSets: unknown "
-                           "descriptor type.");
+  };
+  return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
+      name, functor);
 }
 
 Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,

@@ -1,3 +1,4 @@
+#include <map_merge_3d/dispatch.h>
 #include <map_merge_3d/features.h>
 
 #include <pcl/conversions.h>
@@ -54,13 +55,13 @@ PointCloudPtr detectKeypoints(const PointCloudPtr &points, double min_scale,
 }
 
 /* implementation for specific descriptor type  */
-template <template<typename,typename,typename> class DescriptorExtractor, typename DescriptorT>
+template <typename DescriptorExtractor, typename DescriptorT>
 LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
                                             const SurfaceNormalsPtr &normals,
                                             const PointCloudPtr &keypoints,
                                             double feature_radius)
 {
-  DescriptorExtractor<PointT, NormalT, DescriptorT> descriptor;
+  DescriptorExtractor descriptor;
   descriptor.setRadiusSearch(feature_radius);
   descriptor.setSearchSurface(points);
   descriptor.setInputNormals(normals);
@@ -82,11 +83,14 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
                                             Descriptor descriptor,
                                             double feature_radius)
 {
-  switch (descriptor) {
-    case Descriptor::PFH:
-      return computeLocalDescriptors<pcl::PFHEstimation, pcl::PFHSignature125>(
-          points, normals, keypoints, feature_radius);
-  }
+  // this will be dispatched for all descriptors type
+  auto functor = [&](auto descriptor_type) {
+    return computeLocalDescriptors<
+        typename decltype(descriptor_type)::Estimator,
+        typename decltype(descriptor_type)::PointType>(
+        points, normals, keypoints, feature_radius);
+  };
+  return dispatch<decltype(functor), DESCRIPTORS_NAMES>(descriptor, functor);
 }
 
 SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,
