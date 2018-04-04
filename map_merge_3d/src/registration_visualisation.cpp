@@ -47,6 +47,7 @@ int main(int argc, char **argv)
   const double max_correspondence_distance = inlier_threshold * 2.;
   const int nr_iterations = 1000;
   const int max_iterations = 200;
+  std::string descriptor_name = "PFH";
 
   pcl::console::parse_argument(argc, argv, "--normal_radius", normal_radius);
   pcl::console::parse_argument(argc, argv, "--descriptor_radius",
@@ -55,6 +56,7 @@ int main(int argc, char **argv)
   pcl::console::parse_argument(argc, argv, "--min_neighbours", min_neighbours);
   pcl::console::parse_argument(argc, argv, "--filtering_radius",
                                filtering_radius);
+  pcl::console::parse_argument(argc, argv, "--descriptor", descriptor_name);
 
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
@@ -92,14 +94,15 @@ int main(int argc, char **argv)
   /* compute descriptors */
   LocalDescriptorsPtr descriptors1, descriptors2;
   SurfaceNormalsPtr normals1, normals2;
+  Descriptor descriptor_type = fromString(descriptor_name);
   {
     pcl::ScopeTime t("descriptors computation");
     normals1 = computeSurfaceNormals(cloud1, normal_radius);
     descriptors1 = computeLocalDescriptors(cloud1, normals1, keypoints1,
-                                           Descriptor::PFH, descriptor_radius);
+                                           descriptor_type, descriptor_radius);
     normals2 = computeSurfaceNormals(cloud2, normal_radius);
     descriptors2 = computeLocalDescriptors(cloud2, normals2, keypoints2,
-                                           Descriptor::PFH, descriptor_radius);
+                                           descriptor_type, descriptor_radius);
   }
 
   std::cout << "extracted descriptors:" << std::endl;

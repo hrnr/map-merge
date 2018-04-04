@@ -3,7 +3,9 @@
 
 #include <map_merge_3d/typedefs.h>
 
-enum class Descriptor { PFH };
+enum class Descriptor { PFH, FPFH, RSD, SHOT };
+
+Descriptor fromString(const std::string &name);
 
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
 

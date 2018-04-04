@@ -5,7 +5,10 @@
 
 #include <tuple>
 
+#include <pcl/features/fpfh.h>
 #include <pcl/features/pfh.h>
+#include <pcl/features/rsd.h>
+#include <pcl/features/shot.h>
 
 /*
 When addding support for a new descriptor: Add descriptor to DESCRIPTORS_NAMES,
@@ -15,15 +18,29 @@ and descriptors_types tuple.
 */
 
 // list of all descriptors defined in Descriptor enum
-#define DESCRIPTORS_NAMES Descriptor::PFH
+#define DESCRIPTORS_NAMES                                                      \
+  Descriptor::PFH, Descriptor::FPFH, Descriptor::RSD, Descriptor::SHOT
 
-struct DescriptorPFHType {
-  typedef pcl::PFHSignature125 PointType;
-  typedef pcl::PFHEstimation<PointT, NormalT, PointType> Estimator;
-  constexpr const static auto name = "pfh";
-};
+#define DECLARE_DESCRIPTOR_TYPE(type, point_type, estimator, name_)            \
+  struct type##DescriptorType {                                                \
+    typedef pcl::point_type PointType;                                         \
+    typedef pcl::estimator<PointT, NormalT, PointType> Estimator;              \
+    constexpr const static auto name = #name_;                                 \
+    constexpr const static Descriptor descriptor = Descriptor::type;           \
+  };
 
-static std::tuple<DescriptorPFHType> descriptor_types;
+DECLARE_DESCRIPTOR_TYPE(PFH, PFHSignature125, PFHEstimation, pfh)
+DECLARE_DESCRIPTOR_TYPE(FPFH, FPFHSignature33, FPFHEstimation, fpfh)
+// RIFT uses intensity gradients
+// DECLARE_DESCRIPTOR_TYPE(RIFT, Histogram<32>, RIFTEstimation, rift)
+DECLARE_DESCRIPTOR_TYPE(RSD, PrincipalRadiiRSD, RSDEstimation, r_min)
+DECLARE_DESCRIPTOR_TYPE(SHOT, SHOT352, SHOTEstimation, shot)
+// SHOT color descriptor is indistinguishable from normal shot
+// DECLARE_DESCRIPTOR_TYPE(SHOT_COLOR, SHOT1344, SHOTColorEstimation, shotcolor)
+
+static std::tuple<PFHDescriptorType, FPFHDescriptorType, RSDDescriptorType,
+                  SHOTDescriptorType>
+    descriptor_types;
 
 /* dispatching for all descriptors defined in Descriptor enum */
 

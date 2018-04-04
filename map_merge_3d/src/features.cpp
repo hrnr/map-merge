@@ -1,6 +1,8 @@
 #include <map_merge_3d/dispatch.h>
 #include <map_merge_3d/features.h>
 
+#include <algorithm>
+
 #include <pcl/conversions.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/pfh.h>
@@ -104,4 +106,17 @@ SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,
   estimator.compute(*normals);
 
   return normals;
+}
+
+Descriptor fromString(const std::string &name)
+{
+  // we have all identifiers in lowercase
+  std::string lower_case = name;
+  std::transform(lower_case.begin(), lower_case.end(), lower_case.begin(),
+                 ::tolower);
+  auto functor = [](auto descriptor_type) {
+    return descriptor_type.descriptor;
+  };
+  return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
+      lower_case, functor);
 }

@@ -17,9 +17,9 @@ static inline void
 assertDescriptorsPair(const LocalDescriptorsPtr &source_descriptors,
                       const LocalDescriptorsPtr &target_descriptors)
 {
-  if (source_descriptors->fields.size() != 1 ||
-      target_descriptors->fields.size() != 1) {
-    throw std::runtime_error("descriptors must contain exactly one field with "
+  if (source_descriptors->fields.empty() ||
+      target_descriptors->fields.empty()) {
+    throw std::runtime_error("descriptors must contain at least one field with "
                              "descriptors.");
   }
 }
