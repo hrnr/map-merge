@@ -42,21 +42,22 @@ int main(int argc, char **argv)
   const double min_contrast = 5.0;
   double normal_radius = resolution * 6.;
   double descriptor_radius = resolution * 8.;
-  double filtering_radius = resolution * 2.;
-  const double inlier_threshold = resolution * 5.;
+  double inlier_threshold = resolution * 5.;
   const double max_correspondence_distance = inlier_threshold * 2.;
   const int nr_iterations = 1000;
   const int max_iterations = 200;
   std::string descriptor_name = "PFH";
+  int matching_k = 5;
 
   pcl::console::parse_argument(argc, argv, "--normal_radius", normal_radius);
   pcl::console::parse_argument(argc, argv, "--descriptor_radius",
                                descriptor_radius);
   pcl::console::parse_argument(argc, argv, "--resolution", resolution);
   pcl::console::parse_argument(argc, argv, "--min_neighbours", min_neighbours);
-  pcl::console::parse_argument(argc, argv, "--filtering_radius",
-                               filtering_radius);
   pcl::console::parse_argument(argc, argv, "--descriptor", descriptor_name);
+  pcl::console::parse_argument(argc, argv, "--matching_k", matching_k);
+  pcl::console::parse_argument(argc, argv, "--inlier_threshold",
+                               inlier_threshold);
 
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
@@ -116,8 +117,8 @@ int main(int argc, char **argv)
 
   {
     pcl::ScopeTime t("finding correspondences");
-    CorrespondencesPtr correspondences =
-        findFeatureCorrespondences(descriptors1, descriptors2);
+    CorrespondencesPtr correspondences = findFeatureCorrespondences(
+        descriptors1, descriptors2, size_t(matching_k));
     transform = estimateTransformFromCorrespondences(
         keypoints1, keypoints2, correspondences, inliers, inlier_threshold);
   }

@@ -28,7 +28,8 @@ assertDescriptorsPair(const LocalDescriptorsPtr &source_descriptors,
 template <typename DescriptorT>
 CorrespondencesPtr
 findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors_,
-                           const LocalDescriptorsPtr &target_descriptors_)
+                           const LocalDescriptorsPtr &target_descriptors_,
+                           size_t k)
 {
   typedef pcl::PointCloud<DescriptorT> DescriptorsPointCLoud1;
 
@@ -51,8 +52,6 @@ findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors_,
   source_search.setInputCloud(source_descriptors);
   source_search.setSortedResults(true);
 
-  // storing nearest k search result
-  const int k = 5;
   // forward search results
   std::vector<int> k_indices(k);
   std::vector<float> k_squared_distances(k);
@@ -95,14 +94,15 @@ findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors_,
 // matches reciprocal correspondences among k-nearest matches
 CorrespondencesPtr
 findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
-                           const LocalDescriptorsPtr &target_descriptors)
+                           const LocalDescriptorsPtr &target_descriptors,
+                           size_t k)
 {
   assertDescriptorsPair(source_descriptors, target_descriptors);
 
   const std::string &name = source_descriptors->fields[0].name;
   auto functor = [&](auto descriptor_type) {
     return findFeatureCorrespondences<typename decltype(
-        descriptor_type)::PointType>(source_descriptors, target_descriptors);
+        descriptor_type)::PointType>(source_descriptors, target_descriptors, k);
   };
   return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
       name, functor);

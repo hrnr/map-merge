@@ -5,7 +5,8 @@
 
 CorrespondencesPtr
 findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
-                           const LocalDescriptorsPtr &target_descriptors);
+                           const LocalDescriptorsPtr &target_descriptors,
+                           size_t k = 5);
 
 Eigen::Matrix4f estimateTransformFromCorrespondences(
     const PointCloudPtr &source_keypoints,
