@@ -39,7 +39,7 @@ int main(int argc, char **argv)
   int min_neighbours = 50;
   const int nr_octaves = 3;
   const int nr_octaves_per_scale = 3;
-  const double min_contrast = 5.0;
+  double min_contrast = 5.0;
   double normal_radius = resolution * 6.;
   double descriptor_radius = resolution * 8.;
   double inlier_threshold = resolution * 5.;
@@ -58,6 +58,7 @@ int main(int argc, char **argv)
   pcl::console::parse_argument(argc, argv, "--matching_k", matching_k);
   pcl::console::parse_argument(argc, argv, "--inlier_threshold",
                                inlier_threshold);
+  pcl::console::parse_argument(argc, argv, "--min_contrast", min_contrast);
 
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
