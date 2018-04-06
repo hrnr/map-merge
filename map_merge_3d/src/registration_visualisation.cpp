@@ -37,9 +37,7 @@ int main(int argc, char **argv)
 {
   double resolution = 0.1;
   int min_neighbours = 50;
-  const int nr_octaves = 3;
-  const int nr_octaves_per_scale = 3;
-  double min_contrast = 5.0;
+  double keypoint_threshold = 5.0;
   double normal_radius = resolution * 6.;
   double descriptor_radius = resolution * 8.;
   double inlier_threshold = resolution * 5.;
@@ -47,6 +45,7 @@ int main(int argc, char **argv)
   const int nr_iterations = 1000;
   const int max_iterations = 200;
   std::string descriptor_name = "PFH";
+  std::string keypoint_name = "SIFT";
   int matching_k = 5;
 
   pcl::console::parse_argument(argc, argv, "--normal_radius", normal_radius);
@@ -55,10 +54,12 @@ int main(int argc, char **argv)
   pcl::console::parse_argument(argc, argv, "--resolution", resolution);
   pcl::console::parse_argument(argc, argv, "--min_neighbours", min_neighbours);
   pcl::console::parse_argument(argc, argv, "--descriptor", descriptor_name);
+  pcl::console::parse_argument(argc, argv, "--keypoint_type", keypoint_name);
   pcl::console::parse_argument(argc, argv, "--matching_k", matching_k);
   pcl::console::parse_argument(argc, argv, "--inlier_threshold",
                                inlier_threshold);
-  pcl::console::parse_argument(argc, argv, "--min_contrast", min_contrast);
+  pcl::console::parse_argument(argc, argv, "--keypoint_threshold",
+                               keypoint_threshold);
 
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
@@ -81,36 +82,44 @@ int main(int argc, char **argv)
 
   visualisePointCloud(cloud1);
 
+  /* detect normals */
+  SurfaceNormalsPtr normals1, normals2;
+  {
+    pcl::ScopeTime t("normals computation");
+    normals1 = computeSurfaceNormals(cloud1, normal_radius);
+    normals2 = computeSurfaceNormals(cloud2, normal_radius);
+  }
+
+  visualiseNormals(cloud1, normals1);
+
   /* detect keypoints */
   PointCloudPtr keypoints1, keypoints2;
+  Keypoint keypoint_type = keypointType(keypoint_name);
   {
-    pcl::ScopeTime t("feature detection");
-    keypoints1 = detectKeypoints(cloud1, resolution, nr_octaves,
-                                 nr_octaves_per_scale, min_contrast);
-    keypoints2 = detectKeypoints(cloud2, resolution, nr_octaves,
-                                 nr_octaves_per_scale, min_contrast);
+    pcl::ScopeTime t("keypoints detection");
+    keypoints1 =
+        detectKeypoints(cloud1, normals1, keypoint_type, keypoint_threshold,
+                        normal_radius, resolution);
+    keypoints2 =
+        detectKeypoints(cloud2, normals2, keypoint_type, keypoint_threshold,
+                        normal_radius, resolution);
   }
 
   visualiseKeypoints(cloud1, keypoints1);
 
   /* compute descriptors */
   LocalDescriptorsPtr descriptors1, descriptors2;
-  SurfaceNormalsPtr normals1, normals2;
-  Descriptor descriptor_type = fromString(descriptor_name);
+  Descriptor descriptor_type = descriptorType(descriptor_name);
   {
     pcl::ScopeTime t("descriptors computation");
-    normals1 = computeSurfaceNormals(cloud1, normal_radius);
     descriptors1 = computeLocalDescriptors(cloud1, normals1, keypoints1,
                                            descriptor_type, descriptor_radius);
-    normals2 = computeSurfaceNormals(cloud2, normal_radius);
     descriptors2 = computeLocalDescriptors(cloud2, normals2, keypoints2,
                                            descriptor_type, descriptor_radius);
   }
 
   std::cout << "extracted descriptors:" << std::endl;
   printPointCloud2Summary(*descriptors1);
-
-  visualiseNormals(cloud1, normals1);
 
   /* compute correspondences */
   CorrespondencesPtr inliers;

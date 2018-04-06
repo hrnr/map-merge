@@ -5,10 +5,12 @@
 
 #include <pcl/conversions.h>
 #include <pcl/features/normal_3d.h>
-#include <pcl/features/pfh.h>
+#include <pcl/filters/filter.h>
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/keypoints/harris_3d.h>
 #include <pcl/keypoints/sift_keypoint.h>
+#include <pcl/point_representation.h>
 
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution)
 {
@@ -38,9 +40,10 @@ PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
   return output;
 }
 
-PointCloudPtr detectKeypoints(const PointCloudPtr &points, double min_scale,
-                              int nr_octaves, int nr_scales_per_octave,
-                              double min_contrast)
+static PointCloudPtr detectKeypointsSIFT(const PointCloudPtr &points,
+                                         double min_scale, int nr_octaves,
+                                         int nr_scales_per_octave,
+                                         double min_contrast)
 {
   pcl::SIFTKeypoint<PointT, pcl::PointWithScale> detector;
   detector.setScales(float(min_scale), nr_octaves, nr_scales_per_octave);
@@ -56,6 +59,40 @@ PointCloudPtr detectKeypoints(const PointCloudPtr &points, double min_scale,
   return keypoints;
 }
 
+static PointCloudPtr detectKeypointsHarris(const PointCloudPtr &points,
+                                           const SurfaceNormalsPtr &normals,
+                                           double threshold, double radius)
+{
+  pcl::HarrisKeypoint3D<PointT, pcl::PointXYZI> detector;
+  detector.setInputCloud(points);
+  detector.setNormals(normals);
+  detector.setNonMaxSupression(true);
+  detector.setRefine(true);
+  detector.setThreshold(float(threshold));
+  detector.setRadius(float(radius));
+
+  pcl::PointCloud<pcl::PointXYZI> keypoints_temp;
+  detector.compute(keypoints_temp);
+
+  PointCloudPtr keypoints(new PointCloud);
+  pcl::copyPointCloud(keypoints_temp, *keypoints);
+
+  return keypoints;
+}
+
+PointCloudPtr detectKeypoints(const PointCloudPtr &points,
+                              const SurfaceNormalsPtr &normals, Keypoint type,
+                              double threshold, double radius,
+                              double resolution)
+{
+  switch (type) {
+    case Keypoint::SIFT:
+      return detectKeypointsSIFT(points, resolution, 3, 3, threshold);
+    case Keypoint::HARRIS:
+      return detectKeypointsHarris(points, normals, threshold, radius);
+  }
+}
+
 /* implementation for specific descriptor type  */
 template <typename DescriptorExtractor, typename DescriptorT>
 LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
@@ -69,12 +106,42 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
   descriptor.setInputNormals(normals);
   descriptor.setInputCloud(keypoints);
 
-  pcl::PointCloud<DescriptorT> descriptors;
-  descriptor.compute(descriptors);
+  typename pcl::PointCloud<DescriptorT>::Ptr descriptors (new pcl::PointCloud<DescriptorT>);
+  descriptor.compute(*descriptors);
+
+  // remove invalid descriptors (it might not be possible to compute descriptors
+  // for all keypoints)
+
+  // find invalid points
+  pcl::DefaultPointRepresentation<DescriptorT> point_rep;
+  pcl::IndicesPtr invalid_indices (new std::vector<int>);
+  int i = 0;
+  for (auto d : *descriptors) {
+    if (!point_rep.isValid(d)) {
+      invalid_indices->push_back(i);
+    }
+    ++i;
+  }
+
+  // remove invalid descriptors
+  pcl::ExtractIndices<DescriptorT> filter;
+  filter.setInputCloud(descriptors);
+  filter.setIndices(invalid_indices);
+  filter.setNegative(true);
+  filter.filter(*descriptors);
+
+  // filter also keypoints to keep keypoints and the descriptors synchronized
+  pcl::ExtractIndices<PointT> filter_keypoints;
+  filter_keypoints.setInputCloud(keypoints);
+  filter_keypoints.setIndices(invalid_indices);
+  filter_keypoints.setNegative(true);
+  filter_keypoints.filter(*keypoints);
+
+  assert(keypoints->points.size() == descriptors->points.size());
 
   // convert to PointCloud2 which is able to hold any descriptors data
   LocalDescriptorsPtr result(new LocalDescriptors);
-  pcl::toPCLPointCloud2(descriptors, *result);
+  pcl::toPCLPointCloud2(*descriptors, *result);
 
   return result;
 }
@@ -108,7 +175,7 @@ SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,
   return normals;
 }
 
-Descriptor fromString(const std::string &name)
+Descriptor descriptorType(const std::string &name)
 {
   // we have all identifiers in lowercase
   std::string lower_case = name;
@@ -119,4 +186,15 @@ Descriptor fromString(const std::string &name)
   };
   return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
       lower_case, functor);
+}
+
+Keypoint keypointType(const std::string &name)
+{
+  if (name == "SIFT") {
+    return Keypoint::SIFT;
+  } else if (name == "HARRIS") {
+    return Keypoint::HARRIS;
+  }
+
+  throw new std::runtime_error("unknown keypoint type");
 }

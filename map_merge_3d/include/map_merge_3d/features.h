@@ -5,32 +5,26 @@
 
 enum class Descriptor { PFH, FPFH, RSD, SHOT, SC3D };
 
-Descriptor fromString(const std::string &name);
+Descriptor descriptorType(const std::string &name);
 
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
 
 PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
                              int min_neighbours);
 
-/**
- * @brief Use SIFTKeypoint to detect a set of keypoints
- *
- * @param points input cloud
- * @param min_scale the smallest scale in the difference-of-Gaussians (DoG)
- * scale-space
- * @param nr_octaves the number of times the scale doubles in the DoG
- * scale-space
- * @param nr_scales_per_octave the number of scales computed for each doubling
- * @param min_contrast the minimum local contrast that must be present for a
- * keypoint to be detected
- * @return cloud of keypoints
- */
-PointCloudPtr detectKeypoints(const PointCloudPtr &points, double min_scale,
-                              int nr_octaves, int nr_scales_per_octave,
-                              double min_contrast);
+enum class Keypoint { SIFT, HARRIS };
+
+Keypoint keypointType(const std::string &name);
+
+PointCloudPtr detectKeypoints(const PointCloudPtr &points,
+                              const SurfaceNormalsPtr &normals, Keypoint type,
+                              double threshold, double radius,
+                              double resolution);
 
 /**
- * @brief Compute local feature descriptors around each keypoint
+ * @brief Compute local feature descriptors around each keypoint. If descriptors
+ * can not be computer to some of the keypoints, those keypoints will be removed
+ * from the keypoints cloud. Therefore the keypoints cloud can be also modified.
  *
  * @param points input pointcloud
  * @param normals input normals for the cloud
