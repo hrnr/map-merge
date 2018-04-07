@@ -31,16 +31,34 @@ include_directories(
 	${catkin_INCLUDE_DIRS}
 )
 
-add_executable(registration_visualisation
-  src/registration_visualisation.cpp
-  src/visualise.cpp
+add_library(map_merging STATIC
   src/matching.cpp
   src/features.cpp
 )
+add_dependencies(map_merging ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(map_merging ${catkin_LIBRARIES})
+
+# visualising tool
+add_executable(registration_visualisation
+  src/registration_visualisation.cpp
+  src/visualise.cpp
+)
 add_dependencies(registration_visualisation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(registration_visualisation
+  map_merging
   ${catkin_LIBRARIES}
 )
+
+# commandline tool for merging
+add_executable(map_merge_tool
+  src/map_merge_tool.cpp
+)
+add_dependencies(map_merge_tool ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(map_merge_tool
+  map_merging
+  ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##

@@ -1,23 +1,32 @@
 #include <map_merge_3d/features.h>
 #include <map_merge_3d/matching.h>
-#include <map_merge_3d/visualise.h>
 
 #include <pcl/console/parse.h>
 #include <pcl/io/pcd_io.h>
 
 int main(int argc, char **argv)
 {
-  // std::vector<int> pcd_file_indices =
-  //     pcl::console::parse_file_extension_argument(argc, argv, ".pcd");
-  // double resolution = 0.05;
-  // pcl::console::parse_argument(argc, argv, "--resolution", resolution);
+  std::vector<int> pcd_file_indices =
+      pcl::console::parse_file_extension_argument(argc, argv, ".pcd");
+  std::string output_name = "output.pcd";
 
-  // result = downSample(result, resolution);
+  if (pcd_file_indices.size() < 2) {
+    pcl::console::print_error("Need at least 2 input files!\n");
+    return -1;
+  }
 
-  // pcl::PointCloud<pcl::PointXYZ> final_result;
-  // pcl::copyPointCloud(*result, final_result);
-
-  // pcl::io::savePCDFileBinary("result.pcd", final_result);
+  // load input pointclouds
+  std::vector<PointCloudPtr> clouds;
+  for (int idx : pcd_file_indices) {
+    PointCloudPtr cloud(new PointCloud);
+    auto file_name = argv[idx];
+    if (pcl::io::loadPCDFile<PointT>(file_name, *cloud) < 0) {
+      pcl::console::print_error("Error loading pointcloud file %s. Aborting.\n",
+                                file_name);
+      return -1;
+    }
+    clouds.push_back(cloud);
+  }
 
   return 0;
 }
