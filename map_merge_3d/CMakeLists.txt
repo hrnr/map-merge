@@ -34,6 +34,7 @@ include_directories(
 add_library(map_merging STATIC
   src/matching.cpp
   src/features.cpp
+  src/map_merging.cpp
 )
 add_dependencies(map_merging ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(map_merging ${catkin_LIBRARIES})

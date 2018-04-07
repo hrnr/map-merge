@@ -52,13 +52,13 @@ static std::tuple<PFHDescriptorType, PFHRGBDescriptorType, FPFHDescriptorType,
 
 // default case
 template <typename Functor>
-LocalDescriptorsPtr dispatch(Descriptor, Functor)
+static LocalDescriptorsPtr dispatch(Descriptor, Functor)
 {
   throw std::runtime_error("unknown descriptor type");
 }
 
 template <typename Functor, Descriptor d, Descriptor... D>
-LocalDescriptorsPtr dispatch(Descriptor descriptor, Functor f)
+static LocalDescriptorsPtr dispatch(Descriptor descriptor, Functor f)
 {
   if (descriptor == d) {
     return f(std::get<static_cast<size_t>(d)>(descriptor_types));
@@ -71,14 +71,15 @@ LocalDescriptorsPtr dispatch(Descriptor descriptor, Functor f)
 
 // default case
 template <typename Functor>
-auto dispatchByDescriptorName(const std::string&, Functor f)
+static auto dispatchByDescriptorName(const std::string&, Functor f)
     -> decltype(f(std::get<0>(descriptor_types)))
 {
   throw std::runtime_error("unknown descriptor type");
 }
 
 template <typename Functor, Descriptor d, Descriptor... D>
-decltype(auto) dispatchByDescriptorName(const std::string& name, Functor f)
+static decltype(auto) dispatchByDescriptorName(const std::string& name,
+                                               Functor f)
 {
   auto descriptor_type = std::get<static_cast<size_t>(d)>(descriptor_types);
   if (name == descriptor_type.name) {

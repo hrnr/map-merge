@@ -26,7 +26,7 @@ assertDescriptorsPair(const LocalDescriptorsPtr &source_descriptors,
 
 // matches reciprocal correspondences among k-nearest matches
 template <typename DescriptorT>
-CorrespondencesPtr
+static CorrespondencesPtr
 findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors_,
                            const LocalDescriptorsPtr &target_descriptors_,
                            size_t k)
@@ -92,10 +92,9 @@ findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors_,
 }
 
 // matches reciprocal correspondences among k-nearest matches
-CorrespondencesPtr
-findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
-                           const LocalDescriptorsPtr &target_descriptors,
-                           size_t k)
+CorrespondencesPtr findFeatureCorrespondences(
+    const LocalDescriptorsPtr &source_descriptors,
+    const LocalDescriptorsPtr &target_descriptors, size_t k)
 {
   assertDescriptorsPair(source_descriptors, target_descriptors);
 
@@ -152,7 +151,7 @@ Eigen::Matrix4f estimateTransformFromCorrespondences(
 }
 
 template <typename DescriptorT>
-Eigen::Matrix4f estimateTransformFromDescriptorsSets(
+static Eigen::Matrix4f estimateTransformFromDescriptorsSets(
     const PointCloudPtr &source_keypoints,
     const LocalDescriptorsPtr &source_descriptors_,
     const PointCloudPtr &target_keypoints,

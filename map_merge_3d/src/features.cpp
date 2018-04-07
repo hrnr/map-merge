@@ -95,10 +95,10 @@ PointCloudPtr detectKeypoints(const PointCloudPtr &points,
 
 /* implementation for specific descriptor type  */
 template <typename DescriptorExtractor, typename DescriptorT>
-LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
-                                            const SurfaceNormalsPtr &normals,
-                                            const PointCloudPtr &keypoints,
-                                            double feature_radius)
+static LocalDescriptorsPtr
+computeLocalDescriptors(const PointCloudPtr &points,
+                        const SurfaceNormalsPtr &normals,
+                        const PointCloudPtr &keypoints, double feature_radius)
 {
   DescriptorExtractor descriptor;
   descriptor.setRadiusSearch(feature_radius);
@@ -106,7 +106,8 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
   descriptor.setInputNormals(normals);
   descriptor.setInputCloud(keypoints);
 
-  typename pcl::PointCloud<DescriptorT>::Ptr descriptors (new pcl::PointCloud<DescriptorT>);
+  typename pcl::PointCloud<DescriptorT>::Ptr descriptors(
+      new pcl::PointCloud<DescriptorT>);
   descriptor.compute(*descriptors);
 
   // remove invalid descriptors (it might not be possible to compute descriptors
@@ -114,7 +115,7 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
 
   // find invalid points
   pcl::DefaultPointRepresentation<DescriptorT> point_rep;
-  pcl::IndicesPtr invalid_indices (new std::vector<int>);
+  pcl::IndicesPtr invalid_indices(new std::vector<int>);
   int i = 0;
   for (auto d : *descriptors) {
     if (!point_rep.isValid(d)) {
