@@ -8,6 +8,7 @@
 #include <pcl/features/3dsc.h>
 #include <pcl/features/fpfh.h>
 #include <pcl/features/pfh.h>
+#include <pcl/features/pfhrgb.h>
 #include <pcl/features/rsd.h>
 #include <pcl/features/shot.h>
 
@@ -20,8 +21,8 @@ and descriptors_types tuple.
 
 // list of all descriptors defined in Descriptor enum
 #define DESCRIPTORS_NAMES                                                      \
-  Descriptor::PFH, Descriptor::FPFH, Descriptor::RSD, Descriptor::SHOT,        \
-      Descriptor::SC3D
+  Descriptor::PFH, Descriptor::PFHRGB, Descriptor::FPFH, Descriptor::RSD,      \
+      Descriptor::SHOT, Descriptor::SC3D
 
 #define DECLARE_DESCRIPTOR_TYPE(type, point_type, estimator, name_)            \
   struct type##DescriptorType {                                                \
@@ -32,18 +33,19 @@ and descriptors_types tuple.
   };
 
 DECLARE_DESCRIPTOR_TYPE(PFH, PFHSignature125, PFHEstimation, pfh)
+DECLARE_DESCRIPTOR_TYPE(PFHRGB, PFHRGBSignature250, PFHRGBEstimation, pfhrgb)
 DECLARE_DESCRIPTOR_TYPE(FPFH, FPFHSignature33, FPFHEstimation, fpfh)
 // RIFT uses intensity gradients
 // DECLARE_DESCRIPTOR_TYPE(RIFT, Histogram<32>, RIFTEstimation, rift)
 DECLARE_DESCRIPTOR_TYPE(RSD, PrincipalRadiiRSD, RSDEstimation, r_min)
-DECLARE_DESCRIPTOR_TYPE(SHOT, SHOT352, SHOTEstimation, shot)
+// DECLARE_DESCRIPTOR_TYPE(SHOT, SHOT352, SHOTEstimation, shot)
 // SHOT color descriptor is indistinguishable from normal shot
-// DECLARE_DESCRIPTOR_TYPE(SHOT_COLOR, SHOT1344, SHOTColorEstimation, shotcolor)
+DECLARE_DESCRIPTOR_TYPE(SHOT, SHOT1344, SHOTColorEstimation, shot)
 DECLARE_DESCRIPTOR_TYPE(SC3D, ShapeContext1980, ShapeContext3DEstimation,
                         shape_context)
 
-static std::tuple<PFHDescriptorType, FPFHDescriptorType, RSDDescriptorType,
-                  SHOTDescriptorType, SC3DDescriptorType>
+static std::tuple<PFHDescriptorType, PFHRGBDescriptorType, FPFHDescriptorType,
+                  RSDDescriptorType, SHOTDescriptorType, SC3DDescriptorType>
     descriptor_types;
 
 /* dispatching for all descriptors defined in Descriptor enum */

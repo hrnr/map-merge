@@ -3,7 +3,7 @@
 
 #include <map_merge_3d/typedefs.h>
 
-enum class Descriptor { PFH, FPFH, RSD, SHOT, SC3D };
+enum class Descriptor { PFH, PFHRGB, FPFH, RSD, SHOT, SC3D };
 
 Descriptor descriptorType(const std::string &name);
 
