@@ -3,10 +3,9 @@
 
 #include <map_merge_3d/typedefs.h>
 
-CorrespondencesPtr
-findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors,
-                           const LocalDescriptorsPtr &target_descriptors,
-                           size_t k = 5);
+CorrespondencesPtr findFeatureCorrespondences(
+    const LocalDescriptorsPtr &source_descriptors,
+    const LocalDescriptorsPtr &target_descriptors, size_t k = 5);
 
 Eigen::Matrix4f estimateTransformFromCorrespondences(
     const PointCloudPtr &source_keypoints,
@@ -62,5 +61,15 @@ Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
                                      double outlier_rejection_threshold,
                                      int max_iterations = 100,
                                      double transformation_epsilon = 0.0);
+
+enum class EstimationMethod { MATCHING, SAC_IA };
+
+Eigen::Matrix4f estimateTransform(
+    const PointCloudPtr &source_points, const PointCloudPtr &source_keypoints,
+    const LocalDescriptorsPtr &source_descriptors,
+    const PointCloudPtr &target_points, const PointCloudPtr &target_keypoints,
+    const LocalDescriptorsPtr &target_descriptors, EstimationMethod method,
+    bool refine, double inlier_threshold, double max_correspondence_distance,
+    int max_iterations, size_t matching_k, double transform_epsilon);
 
 #endif  // MAP_MERGE_MATCHING_H_

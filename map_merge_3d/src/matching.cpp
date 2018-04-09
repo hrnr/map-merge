@@ -245,3 +245,39 @@ Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
 
   return (icp.getFinalTransformation() * initial_guess);
 }
+
+Eigen::Matrix4f estimateTransform(
+    const PointCloudPtr &source_points, const PointCloudPtr &source_keypoints,
+    const LocalDescriptorsPtr &source_descriptors,
+    const PointCloudPtr &target_points, const PointCloudPtr &target_keypoints,
+    const LocalDescriptorsPtr &target_descriptors, EstimationMethod method,
+    bool refine, double inlier_threshold, double max_correspondence_distance,
+    int max_iterations, size_t matching_k, double transform_epsilon)
+{
+  Eigen::Matrix4f transform;
+
+  switch (method) {
+    case EstimationMethod::MATCHING: {
+      CorrespondencesPtr inliers;
+      CorrespondencesPtr correspondences = findFeatureCorrespondences(
+          source_descriptors, target_descriptors, matching_k);
+      transform = estimateTransformFromCorrespondences(
+          source_keypoints, target_keypoints, correspondences, inliers,
+          inlier_threshold);
+    } break;
+    case EstimationMethod::SAC_IA: {
+      transform = estimateTransformFromDescriptorsSets(
+          source_keypoints, source_descriptors, target_keypoints,
+          target_descriptors, inlier_threshold, max_correspondence_distance,
+          max_iterations);
+    } break;
+  }
+
+  if (refine) {
+    transform = estimateTransformICP(
+        source_points, target_points, transform, max_correspondence_distance,
+        inlier_threshold, max_iterations, transform_epsilon);
+  }
+
+  return transform;
+}
