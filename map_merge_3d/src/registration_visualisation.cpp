@@ -97,12 +97,10 @@ int main(int argc, char **argv)
   Keypoint keypoint_type = keypointType(keypoint_name);
   {
     pcl::ScopeTime t("keypoints detection");
-    keypoints1 =
-        detectKeypoints(cloud1, normals1, keypoint_type, keypoint_threshold,
-                        normal_radius, resolution);
-    keypoints2 =
-        detectKeypoints(cloud2, normals2, keypoint_type, keypoint_threshold,
-                        normal_radius, resolution);
+    keypoints1 = detectKeypoints(cloud1, normals1, keypoint_type,
+                                 keypoint_threshold, normal_radius, resolution);
+    keypoints2 = detectKeypoints(cloud2, normals2, keypoint_type,
+                                 keypoint_threshold, normal_radius, resolution);
   }
 
   visualiseKeypoints(cloud1, keypoints1);
@@ -133,6 +131,11 @@ int main(int argc, char **argv)
         keypoints1, keypoints2, correspondences, inliers, inlier_threshold);
   }
 
+  std::cout << "matching est score: "
+            << transformScore(cloud1, cloud2, transform,
+                              max_correspondence_distance)
+            << std::endl;
+
   visualiseCorrespondences(cloud1, keypoints1, cloud2, keypoints2, inliers);
 
   // Transform the source point to align them with the target points
@@ -147,6 +150,11 @@ int main(int argc, char **argv)
         max_correspondence_distance, nr_iterations);
   }
 
+  std::cout << "SAC_IA est score: "
+            << transformScore(cloud1, cloud2, transform,
+                              max_correspondence_distance)
+            << std::endl;
+
   // Transform the source point to align them with the target points
   pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
   visualisePointClouds(cloud1_aligned, cloud2);
@@ -158,6 +166,12 @@ int main(int argc, char **argv)
                                      max_correspondence_distance,
                                      inlier_threshold, max_iterations, 1e-3);
   }
+
+  std::cout << "ICP est score: "
+            << transformScore(cloud1, cloud2, transform,
+                              max_correspondence_distance)
+            << std::endl;
+
   pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
   visualisePointClouds(cloud1_aligned, cloud2);
 

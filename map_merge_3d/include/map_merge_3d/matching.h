@@ -72,4 +72,8 @@ Eigen::Matrix4f estimateTransform(
     bool refine, double inlier_threshold, double max_correspondence_distance,
     int max_iterations, size_t matching_k, double transform_epsilon);
 
+double transformScore(const PointCloudPtr &source_points,
+                      const PointCloudPtr &target_points,
+                      const Eigen::Matrix4f &transform, double max_distance);
+
 #endif  // MAP_MERGE_MATCHING_H_

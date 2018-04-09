@@ -6,6 +6,7 @@
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/registration/icp.h>
 #include <pcl/registration/transformation_estimation_svd.h>
+#include <pcl/registration/transformation_validation_euclidean.h>
 #include <pcl/search/kdtree.h>
 
 /**
@@ -280,4 +281,16 @@ Eigen::Matrix4f estimateTransform(
   }
 
   return transform;
+}
+
+double transformScore(const PointCloudPtr &source_points,
+                      const PointCloudPtr &target_points,
+                      const Eigen::Matrix4f &transform,
+                      double max_distance)
+{
+  pcl::registration::TransformationValidationEuclidean<PointT, PointT> validator;
+  validator.setMaxRange(max_distance);
+
+  return validator.validateTransformation(source_points, target_points,
+                                          transform);
 }
