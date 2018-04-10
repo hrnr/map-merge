@@ -63,6 +63,7 @@ Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
                                      double transformation_epsilon = 0.0);
 
 enum class EstimationMethod { MATCHING, SAC_IA };
+EstimationMethod estimationMethod(const std::string &name);
 
 Eigen::Matrix4f estimateTransform(
     const PointCloudPtr &source_points, const PointCloudPtr &source_keypoints,

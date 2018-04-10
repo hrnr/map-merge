@@ -22,6 +22,8 @@ struct MapMergingParams {
   double transform_epsilon = 1e-2;
   double confidence_threshold = 0.0;
   double output_resolution = 0.05;
+
+  static MapMergingParams fromCommandLine(int argc, char **argv);
 };
 
 std::vector<Eigen::Matrix4f> estimateMapsTransforms(

@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  MapMergingParams params;
+  const MapMergingParams params = MapMergingParams::fromCommandLine(argc, argv);
 
   // load input pointclouds
   std::vector<PointCloudPtr> clouds;

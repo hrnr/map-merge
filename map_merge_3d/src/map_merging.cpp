@@ -3,6 +3,52 @@
 #include <map_merge_3d/map_merging.h>
 
 #include <pcl/common/transforms.h>
+#include <pcl/console/parse.h>
+
+MapMergingParams MapMergingParams::fromCommandLine(int argc, char **argv)
+{
+  MapMergingParams params;
+
+  using pcl::console::parse_argument;
+
+  parse_argument(argc, argv, "--resolution", params.resolution);
+  parse_argument(argc, argv, "--descriptor_radius", params.descriptor_radius);
+  parse_argument(argc, argv, "--outliers_min_neighbours",
+                 params.outliers_min_neighbours);
+  parse_argument(argc, argv, "--normal_radius", params.normal_radius);
+  std::string keypoint_type;
+  parse_argument(argc, argv, "--keypoint_type", keypoint_type);
+  if (!keypoint_type.empty()) {
+    params.keypoint_type = keypointType(keypoint_type);
+  }
+  parse_argument(argc, argv, "--keypoint_threshold", params.keypoint_threshold);
+  std::string descriptor_type;
+  parse_argument(argc, argv, "--descriptor_type", descriptor_type);
+  if (!descriptor_type.empty()) {
+    params.descriptor_type = descriptorType(descriptor_type);
+  }
+  std::string estimation_method;
+  parse_argument(argc, argv, "--estimation_method", estimation_method);
+  if (!estimation_method.empty()) {
+    params.estimation_method = estimationMethod(estimation_method);
+  }
+  parse_argument(argc, argv, "--refine_transform", params.refine_transform);
+  parse_argument(argc, argv, "--inlier_threshold", params.inlier_threshold);
+  parse_argument(argc, argv, "--max_correspondence_distance",
+                 params.max_correspondence_distance);
+  parse_argument(argc, argv, "--max_iterations", params.max_iterations);
+  int matching_k = -1;
+  parse_argument(argc, argv, "--matching_k", matching_k);
+  if (matching_k > 0) {
+    params.matching_k = size_t(matching_k);
+  }
+  parse_argument(argc, argv, "--transform_epsilon", params.transform_epsilon);
+  parse_argument(argc, argv, "--confidence_threshold",
+                 params.confidence_threshold);
+  parse_argument(argc, argv, "--output_resolution", params.output_resolution);
+
+  return params;
+}
 
 /**
  * @brief Finds transformation between from and to in pairwise_transforms

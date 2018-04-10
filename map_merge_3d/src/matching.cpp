@@ -285,12 +285,22 @@ Eigen::Matrix4f estimateTransform(
 
 double transformScore(const PointCloudPtr &source_points,
                       const PointCloudPtr &target_points,
-                      const Eigen::Matrix4f &transform,
-                      double max_distance)
+                      const Eigen::Matrix4f &transform, double max_distance)
 {
   pcl::registration::TransformationValidationEuclidean<PointT, PointT> validator;
   validator.setMaxRange(max_distance);
 
   return validator.validateTransformation(source_points, target_points,
                                           transform);
+}
+
+EstimationMethod estimationMethod(const std::string &name)
+{
+  if (name == "MATCHING") {
+    return EstimationMethod::MATCHING;
+  } else if (name == "SAC_IA") {
+    return EstimationMethod::SAC_IA;
+  }
+
+  throw new std::runtime_error("unknown estimation method");
 }
