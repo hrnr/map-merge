@@ -14,6 +14,8 @@ int main(int argc, char **argv)
     return -1;
   }
 
+  MapMergingParams params;
+
   // load input pointclouds
   std::vector<PointCloudPtr> clouds;
   for (int idx : pcd_file_indices) {
@@ -26,6 +28,25 @@ int main(int argc, char **argv)
     }
     clouds.push_back(cloud);
   }
+
+  pcl::console::print_highlight("Estimating transforms.\n");
+
+  std::vector<Eigen::Matrix4f> transforms =
+      estimateMapsTransforms(clouds, params);
+
+  pcl::console::print_highlight("Estimated transforms:\n");
+
+  for (const auto &transform : transforms) {
+    std::cout << transform << std::endl;
+  }
+
+  pcl::console::print_highlight("Compositing clouds and writing to "
+                                "output.pcd\n");
+
+  PointCloudPtr result =
+      composeMaps(clouds, transforms, params.output_resolution);
+
+  pcl::io::savePCDFileBinary(output_name, *result);
 
   return 0;
 }

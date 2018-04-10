@@ -21,9 +21,14 @@ struct MapMergingParams {
   size_t matching_k;
   double transform_epsilon;
   double confidence_threshold;
+  double output_resolution;
 };
 
 std::vector<Eigen::Matrix4f> estimateMapsTransforms(
     const std::vector<PointCloudPtr> &clouds, const MapMergingParams &params);
+
+PointCloudPtr composeMaps(const std::vector<PointCloudPtr> &clouds,
+                          const std::vector<Eigen::Matrix4f> &transforms,
+                          double resolution);
 
 #endif  // MAP_MERGE_MAP_MERGING_H_

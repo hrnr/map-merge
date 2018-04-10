@@ -2,6 +2,8 @@
 #include <map_merge_3d/graph.h>
 #include <map_merge_3d/map_merging.h>
 
+#include <pcl/common/transforms.h>
+
 /**
  * @brief Finds transformation between from and to in pairwise_transforms
  * @details May return either transform present in pairwise_transforms or
@@ -144,4 +146,30 @@ std::vector<Eigen::Matrix4f> estimateMapsTransforms(
       computeGlobalTransforms(pairwise_transforms, params.confidence_threshold);
 
   return global_transforms;
+}
+
+PointCloudPtr composeMaps(const std::vector<PointCloudPtr> &clouds,
+                          const std::vector<Eigen::Matrix4f> &transforms,
+                          double resolution)
+{
+  if (clouds.size() != transforms.size()) {
+    throw new std::runtime_error("composeMaps: clouds and transforms size must "
+                                 "be the same.");
+  }
+
+  PointCloudPtr result(new PointCloud);
+  PointCloudPtr cloud_aligned(new PointCloud);
+  for (size_t i = 0; i < clouds.size(); ++i) {
+    if (transforms[i].isZero()) {
+      continue;
+    }
+
+    pcl::transformPointCloud(*clouds[i], *cloud_aligned, transforms[i]);
+    *result += *cloud_aligned;
+  }
+
+  // voxelize result cloud to required resolution
+  result = downSample(result, resolution);
+
+  return result;
 }

@@ -9,7 +9,7 @@ size_t numberOfNodesInEstimates(
 {
   size_t num_nodes = 0;
   for (const auto &est : pairwise_estimates) {
-    num_nodes = std::max(num_nodes, est.source_idx + 1, est.target_idx + 1);
+    num_nodes = std::max({num_nodes, est.source_idx + 1, est.target_idx + 1});
   }
   return num_nodes;
 }
