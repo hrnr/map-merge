@@ -6,22 +6,22 @@
 #include <map_merge_3d/typedefs.h>
 
 struct MapMergingParams {
-  double resolution;
-  double descriptor_radius;
-  int outliers_min_neighbours;
-  double normal_radius;
-  Keypoint keypoint_type;
-  double keypoint_threshold;
-  Descriptor descriptor_type;
-  EstimationMethod estimation_method;
-  bool refine_transform;
-  double inlier_threshold;
-  double max_correspondence_distance;
-  int max_iterations;
-  size_t matching_k;
-  double transform_epsilon;
-  double confidence_threshold;
-  double output_resolution;
+  double resolution = 0.1;
+  double descriptor_radius = resolution * 8.0;
+  int outliers_min_neighbours = 50;
+  double normal_radius = resolution * 6.0;
+  Keypoint keypoint_type = Keypoint::SIFT;
+  double keypoint_threshold = 5.0;
+  Descriptor descriptor_type = Descriptor::PFH;
+  EstimationMethod estimation_method = EstimationMethod::MATCHING;
+  bool refine_transform = true;
+  double inlier_threshold = resolution * 5.0;
+  double max_correspondence_distance = inlier_threshold * 2.0;
+  int max_iterations = 500;
+  size_t matching_k = 5;
+  double transform_epsilon = 1e-2;
+  double confidence_threshold = 0.0;
+  double output_resolution = 0.05;
 };
 
 std::vector<Eigen::Matrix4f> estimateMapsTransforms(
