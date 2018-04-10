@@ -1,5 +1,6 @@
 #include <map_merge_3d/visualise.h>
 
+#include <pcl/common/transforms.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
 // use just one instance of vis to overcome bug PCL #172
@@ -24,6 +25,14 @@ void visualisePointClouds(PointCloudPtr cloud1, PointCloudPtr cloud2)
   ColorHandlerT blue(cloud2, 0.0, 0.0, 255.0);
   vis.addPointCloud(cloud2, blue, "cloud2");
   show();
+}
+
+void visualiseTransform(PointCloudPtr cloud1, PointCloudPtr cloud2,
+                        const Eigen::Matrix4f &transform)
+{
+  PointCloudPtr cloud1_aligned(new PointCloud);
+  pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
+  visualisePointClouds(cloud1_aligned, cloud2);
 }
 
 void visualisePointCloud(PointCloudPtr cloud)

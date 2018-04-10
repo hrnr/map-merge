@@ -4,6 +4,7 @@
 #include <map_merge_3d/typedefs.h>
 
 void visualisePointClouds(PointCloudPtr cloud1, PointCloudPtr cloud2);
+void visualiseTransform(PointCloudPtr cloud1, PointCloudPtr cloud2, const Eigen::Matrix4f &transform);
 void visualiseCorrespondences(PointCloudPtr cloud1, PointCloudPtr keypoints1,
                               PointCloudPtr cloud2, PointCloudPtr keypoints2,
                               CorrespondencesPtr correspondences,

@@ -6,23 +6,14 @@
 #include <map_merge_3d/visualise.h>
 
 #include <pcl/common/time.h>
-#include <pcl/common/transforms.h>
 #include <pcl/console/parse.h>
 #include <pcl/io/pcd_io.h>
 
 static inline void printPointCloud2Summary(const pcl::PCLPointCloud2 &v)
 {
-  std::cout << "header: " << std::endl;
-  std::cout << v.header;
-  std::cout << "height: ";
-  std::cout << "  " << v.height << std::endl;
-  std::cout << "width: ";
-  std::cout << "  " << v.width << std::endl;
-  std::cout << "fields[]" << std::endl;
   for (size_t i = 0; i < v.fields.size(); ++i) {
-    std::cout << "  fields[" << i << "]: ";
-    std::cout << std::endl;
-    std::cout << "    " << v.fields[i] << std::endl;
+    std::cout << "fields[" << i << "]:" << std::endl;
+    std::cout << v.fields[i] << std::endl;
   }
 }
 
@@ -40,22 +31,30 @@ int main(int argc, char **argv)
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
 
-  // Load object and scene
+  // load input pcd files
   if (pcl::io::loadPCDFile<PointT>(argv[pcd_file_indices[0]], *cloud1) < 0 ||
       pcl::io::loadPCDFile<PointT>(argv[pcd_file_indices[1]], *cloud2) < 0) {
     pcl::console::print_error("Error loading input file!\n");
     return -1;
   }
 
-  cloud1 = downSample(cloud1, params.resolution);
-  cloud2 = downSample(cloud2, params.resolution);
+  pcl::console::print_highlight("Downsampling to working resolution.\n");
+  {
+    pcl::ScopeTime t("downsampling");
+    cloud1 = downSample(cloud1, params.resolution);
+    cloud2 = downSample(cloud2, params.resolution);
+  }
 
   visualisePointCloud(cloud1);
 
-  cloud1 = removeOutliers(cloud1, params.descriptor_radius,
-                          params.outliers_min_neighbours);
-  cloud2 = removeOutliers(cloud2, params.descriptor_radius,
-                          params.outliers_min_neighbours);
+  pcl::console::print_highlight("Removing outliers.\n");
+  {
+    pcl::ScopeTime t("removing outliers");
+    cloud1 = removeOutliers(cloud1, params.descriptor_radius,
+                            params.outliers_min_neighbours);
+    cloud2 = removeOutliers(cloud2, params.descriptor_radius,
+                            params.outliers_min_neighbours);
+  }
 
   visualisePointCloud(cloud1);
 
@@ -120,11 +119,7 @@ int main(int argc, char **argv)
             << std::endl;
 
   visualiseCorrespondences(cloud1, keypoints1, cloud2, keypoints2, inliers);
-
-  // Transform the source point to align them with the target points
-  PointCloudPtr cloud1_aligned(new PointCloud);
-  pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
-  visualisePointClouds(cloud1_aligned, cloud2);
+  visualiseTransform(cloud1, cloud2, transform);
 
   pcl::console::print_highlight("Transform estimation using SAC_IA.\n");
   Eigen::Matrix4f transform_ia;
@@ -141,9 +136,7 @@ int main(int argc, char **argv)
                               params.max_correspondence_distance)
             << std::endl;
 
-  // Transform the source point to align them with the target points
-  pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform_ia);
-  visualisePointClouds(cloud1_aligned, cloud2);
+  visualiseTransform(cloud1, cloud2, transform_ia);
 
   pcl::console::print_highlight("Refining transform with ICP.\n");
   {
@@ -159,8 +152,7 @@ int main(int argc, char **argv)
                               params.max_correspondence_distance)
             << std::endl;
 
-  pcl::transformPointCloud(*cloud1, *cloud1_aligned, transform);
-  visualisePointClouds(cloud1_aligned, cloud2);
+  visualiseTransform(cloud1, cloud2, transform);
 
   return 0;
 }
