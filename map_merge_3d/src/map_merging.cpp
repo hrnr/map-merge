@@ -22,10 +22,10 @@ getTransform(const std::vector<TransformEstimate> &pairwise_transforms,
 {
   for (const auto &est : pairwise_transforms) {
     if (est.source_idx == from && est.target_idx == to) {
-      return est.transform;
+      return est.transform.inverse();
     }
     if (est.source_idx == to && est.target_idx == from) {
-      return est.transform.inverse();
+      return est.transform;
     }
   }
 
