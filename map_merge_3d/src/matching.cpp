@@ -86,8 +86,6 @@ findFeatureCorrespondences(const LocalDescriptorsPtr &source_descriptors_,
       }
     }
   }
-  std::cout << "findFeatureCorrespondences cross-matches: " << result->size()
-            << std::endl;
 
   return result;
 }
@@ -124,18 +122,10 @@ Eigen::Matrix4f estimateTransformFromCorrespondences(
   ransac.setInlierThreshold(inlier_threshold);
   ransac.getCorrespondences(*inliers);
 
-  std::cout << "estimateTransformFromCorrespondences inlier threshold: "
-            << ransac.getInlierThreshold() << std::endl;
-  std::cout << "estimateTransformFromCorrespondences ransac transform: "
-            << std::endl
-            << ransac.getBestTransformation() << std::endl;
-
   // check if we succeded to find a model. unfortunately there is not a better
   // way.
   if (ransac.getBestTransformation().isIdentity()) {
     // ransac failed to find a resonable model
-    std::cout << "estimateTransformFromCorrespondences ransac failed"
-              << std::endl;
     result.setZero();
     inliers->clear();  // ransac will set this to original matches
     return result;
@@ -144,9 +134,6 @@ Eigen::Matrix4f estimateTransformFromCorrespondences(
   pcl::registration::TransformationEstimationSVD<PointT, PointT> svd;
   svd.estimateRigidTransformation(*source_keypoints, *target_keypoints,
                                   *inliers, result);
-
-  std::cout << "estimateTransformFromCorrespondences inliers: "
-            << inliers->size() << std::endl;
 
   return result;
 }
@@ -182,12 +169,7 @@ static Eigen::Matrix4f estimateTransformFromDescriptorsSets(
   PointCloud registration_output;
   estimator.align(registration_output);
 
-  std::cout << "initial alignment converged:" << estimator.hasConverged()
-            << std::endl;
-  std::cout << "initial alignment score:" << estimator.getFitnessScore()
-            << std::endl;
-
-  return (estimator.getFinalTransformation());
+  return estimator.getFinalTransformation();
 }
 
 Eigen::Matrix4f estimateTransformFromDescriptorsSets(
@@ -235,16 +217,7 @@ Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
   PointCloud registration_output;
   icp.align(registration_output);
 
-  std::cout << "ICP final transformation: " << std::endl
-            << icp.getFinalTransformation() << std::endl;
-  if (icp.hasConverged()) {
-    std::cout << "ICP converged." << std::endl
-              << "The score is " << icp.getFitnessScore() << std::endl;
-  } else {
-    std::cout << "ICP did not converge.";
-  }
-
-  return (icp.getFinalTransformation() * initial_guess);
+  return icp.getFinalTransformation() * initial_guess;
 }
 
 Eigen::Matrix4f estimateTransform(
