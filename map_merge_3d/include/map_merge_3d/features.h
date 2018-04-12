@@ -1,20 +1,19 @@
 #ifndef MAP_MERGE_FEATURES_H_
 #define MAP_MERGE_FEATURES_H_
 
+#include <map_merge_3d/enum.h>
 #include <map_merge_3d/typedefs.h>
 
-enum class Descriptor { PFH, PFHRGB, FPFH, RSD, SHOT, SC3D };
-
-Descriptor descriptorType(const std::string &name);
+// define enum class Descriptor + string conversions
+ENUM_CLASS(Descriptor, PFH, PFHRGB, FPFH, RSD, SHOT, SC3D);
 
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
 
 PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
                              int min_neighbours);
 
-enum class Keypoint { SIFT, HARRIS };
-
-Keypoint keypointType(const std::string &name);
+// defines enum class Keypoint + string conversions
+ENUM_CLASS(Keypoint, SIFT, HARRIS);
 
 PointCloudPtr detectKeypoints(const PointCloudPtr &points,
                               const SurfaceNormalsPtr &normals, Keypoint type,

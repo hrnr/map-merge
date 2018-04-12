@@ -175,27 +175,3 @@ SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,
 
   return normals;
 }
-
-Descriptor descriptorType(const std::string &name)
-{
-  // we have all identifiers in lowercase
-  std::string lower_case = name;
-  std::transform(lower_case.begin(), lower_case.end(), lower_case.begin(),
-                 ::tolower);
-  auto functor = [](auto descriptor_type) {
-    return descriptor_type.descriptor;
-  };
-  return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
-      lower_case, functor);
-}
-
-Keypoint keypointType(const std::string &name)
-{
-  if (name == "SIFT") {
-    return Keypoint::SIFT;
-  } else if (name == "HARRIS") {
-    return Keypoint::HARRIS;
-  }
-
-  throw new std::runtime_error("unknown keypoint type");
-}

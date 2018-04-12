@@ -266,14 +266,3 @@ double transformScore(const PointCloudPtr &source_points,
   return validator.validateTransformation(source_points, target_points,
                                           transform);
 }
-
-EstimationMethod estimationMethod(const std::string &name)
-{
-  if (name == "MATCHING") {
-    return EstimationMethod::MATCHING;
-  } else if (name == "SAC_IA") {
-    return EstimationMethod::SAC_IA;
-  }
-
-  throw new std::runtime_error("unknown estimation method");
-}

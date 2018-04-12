@@ -19,18 +19,19 @@ MapMergingParams MapMergingParams::fromCommandLine(int argc, char **argv)
   std::string keypoint_type;
   parse_argument(argc, argv, "--keypoint_type", keypoint_type);
   if (!keypoint_type.empty()) {
-    params.keypoint_type = keypointType(keypoint_type);
+    params.keypoint_type = enums::from_string<Keypoint>(keypoint_type);
   }
   parse_argument(argc, argv, "--keypoint_threshold", params.keypoint_threshold);
   std::string descriptor_type;
   parse_argument(argc, argv, "--descriptor_type", descriptor_type);
   if (!descriptor_type.empty()) {
-    params.descriptor_type = descriptorType(descriptor_type);
+    params.descriptor_type = enums::from_string<Descriptor>(descriptor_type);
   }
   std::string estimation_method;
   parse_argument(argc, argv, "--estimation_method", estimation_method);
   if (!estimation_method.empty()) {
-    params.estimation_method = estimationMethod(estimation_method);
+    params.estimation_method =
+        enums::from_string<EstimationMethod>(estimation_method);
   }
   parse_argument(argc, argv, "--refine_transform", params.refine_transform);
   parse_argument(argc, argv, "--inlier_threshold", params.inlier_threshold);

@@ -1,6 +1,7 @@
 #ifndef MAP_MERGE_MATCHING_H_
 #define MAP_MERGE_MATCHING_H_
 
+#include <map_merge_3d/enum.h>
 #include <map_merge_3d/typedefs.h>
 
 CorrespondencesPtr findFeatureCorrespondences(
@@ -62,8 +63,8 @@ Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
                                      int max_iterations = 100,
                                      double transformation_epsilon = 0.0);
 
-enum class EstimationMethod { MATCHING, SAC_IA };
-EstimationMethod estimationMethod(const std::string &name);
+// defines enum class EstimationMethod + string conversions
+ENUM_CLASS(EstimationMethod, MATCHING, SAC_IA);
 
 Eigen::Matrix4f estimateTransform(
     const PointCloudPtr &source_points, const PointCloudPtr &source_keypoints,
