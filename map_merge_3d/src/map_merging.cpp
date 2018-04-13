@@ -51,6 +51,27 @@ MapMergingParams MapMergingParams::fromCommandLine(int argc, char **argv)
   return params;
 }
 
+std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params) {
+  stream << "resolution: " << params.resolution << std::endl;
+  stream << "descriptor_radius: " << params.descriptor_radius << std::endl;
+  stream << "outliers_min_neighbours: " << params.outliers_min_neighbours << std::endl;
+  stream << "normal_radius: " << params.normal_radius << std::endl;
+  stream << "keypoint_type: " << params.keypoint_type << std::endl;
+  stream << "keypoint_threshold: " << params.keypoint_threshold << std::endl;
+  stream << "descriptor_type: " << params.descriptor_type << std::endl;
+  stream << "estimation_method: " << params.estimation_method << std::endl;
+  stream << "refine_transform: " << params.refine_transform << std::endl;
+  stream << "inlier_threshold: " << params.inlier_threshold << std::endl;
+  stream << "max_correspondence_distance: " << params.max_correspondence_distance << std::endl;
+  stream << "max_iterations: " << params.max_iterations << std::endl;
+  stream << "matching_k: " << params.matching_k << std::endl;
+  stream << "transform_epsilon: " << params.transform_epsilon << std::endl;
+  stream << "confidence_threshold: " << params.confidence_threshold << std::endl;
+  stream << "output_resolution: " << params.output_resolution << std::endl;
+
+  return stream;
+}
+
 /**
  * @brief Finds transformation between from and to in pairwise_transforms
  * @details May return either transform present in pairwise_transforms or

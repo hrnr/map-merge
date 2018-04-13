@@ -1,6 +1,8 @@
 #ifndef MAP_MERGE_MAP_MERGING_H_
 #define MAP_MERGE_MAP_MERGING_H_
 
+#include <ostream>
+
 #include <map_merge_3d/features.h>
 #include <map_merge_3d/matching.h>
 #include <map_merge_3d/typedefs.h>
@@ -25,6 +27,7 @@ struct MapMergingParams {
 
   static MapMergingParams fromCommandLine(int argc, char **argv);
 };
+std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params);
 
 std::vector<Eigen::Matrix4f> estimateMapsTransforms(
     const std::vector<PointCloudPtr> &clouds, const MapMergingParams &params);

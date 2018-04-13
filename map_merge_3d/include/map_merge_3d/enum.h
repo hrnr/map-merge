@@ -1,6 +1,7 @@
 #ifndef MAP_MERGE_ENUM_H_
 #define MAP_MERGE_ENUM_H_
 
+#include <ostream>
 #include <type_traits>
 
 #define NUM_ARGS_(_10, _9, _8, _7, _6, _5, _4, _3, _2, _1, N, ...) N
@@ -23,8 +24,10 @@
 #define ENUM_CLASS(EnumType, ...)                                              \
   enum class EnumType { __VA_ARGS__ };                                         \
                                                                                \
-  namespace enums {                                                            \
-  constexpr inline static const char *to_string(EnumType e) {                  \
+  namespace enums                                                              \
+  {                                                                            \
+  constexpr inline static const char *to_string(EnumType e)                    \
+  {                                                                            \
     const char *names[]{FOREACH_MACRO(STRINGIFY, __VA_ARGS__)};                \
     static_assert(NUM_ARGS(__VA_ARGS__) == (sizeof(names) / sizeof(names[0])), \
                   "unsupported number of enum literals");                      \
@@ -33,7 +36,8 @@
                                                                                \
   template <typename T>                                                        \
   static std::enable_if_t<std::is_same<T, EnumType>::value, T>                 \
-  from_string(const std::string &s) {                                          \
+  from_string(const std::string &s)                                            \
+  {                                                                            \
     constexpr const static char *names[]{                                      \
         FOREACH_MACRO(STRINGIFY, __VA_ARGS__)};                                \
     static_assert(NUM_ARGS(__VA_ARGS__) == (sizeof(names) / sizeof(names[0])), \
@@ -49,6 +53,11 @@
                              " is invalid value for "                          \
                              "enum " #EnumType);                               \
   }                                                                            \
-  } /* namespace enums */
+  } /* namespace enums */                                                      \
+  static inline std::ostream &operator<<(std::ostream &stream, EnumType value) \
+  {                                                                            \
+    stream << enums::to_string(value);                                         \
+    return stream;                                                             \
+  }
 
 #endif  // MAP_MERGE_ENUM_H_

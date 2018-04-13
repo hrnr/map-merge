@@ -27,6 +27,7 @@ int main(int argc, char **argv)
   }
 
   const MapMergingParams params = MapMergingParams::fromCommandLine(argc, argv);
+  std::cout << "params: " << std::endl << params << std::endl;
 
   PointCloudPtr cloud1(new PointCloud);
   PointCloudPtr cloud2(new PointCloud);
