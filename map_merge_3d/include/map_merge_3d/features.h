@@ -4,8 +4,10 @@
 #include <map_merge_3d/enum.h>
 #include <map_merge_3d/typedefs.h>
 
+// define this for dispatch
+#define DESCRIPTORS_NAMES_ PFH, PFHRGB, FPFH, RSD, SHOT, SC3D
 // define enum class Descriptor + string conversions
-ENUM_CLASS(Descriptor, PFH, PFHRGB, FPFH, RSD, SHOT, SC3D);
+ENUM_CLASS(Descriptor, DESCRIPTORS_NAMES_);
 
 PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
 

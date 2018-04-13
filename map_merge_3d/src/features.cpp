@@ -160,7 +160,7 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
         typename decltype(descriptor_type)::PointType>(
         points, normals, keypoints, feature_radius);
   };
-  return dispatch<decltype(functor), DESCRIPTORS_NAMES>(descriptor, functor);
+  return dispatchForEachDescriptor(descriptor, functor);
 }
 
 SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,

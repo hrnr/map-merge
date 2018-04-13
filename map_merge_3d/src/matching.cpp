@@ -102,8 +102,7 @@ CorrespondencesPtr findFeatureCorrespondences(
     return findFeatureCorrespondences<typename decltype(
         descriptor_type)::PointType>(source_descriptors, target_descriptors, k);
   };
-  return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
-      name, functor);
+  return dispatchForEachDescriptor(name, functor);
 }
 
 Eigen::Matrix4f estimateTransformFromCorrespondences(
@@ -189,8 +188,7 @@ Eigen::Matrix4f estimateTransformFromDescriptorsSets(
         target_descriptors, min_sample_distance, max_correspondence_distance,
         max_iterations);
   };
-  return dispatchByDescriptorName<decltype(functor), DESCRIPTORS_NAMES>(
-      name, functor);
+  return dispatchForEachDescriptor(name, functor);
 }
 
 Eigen::Matrix4f estimateTransformICP(const PointCloudPtr &source_points,
