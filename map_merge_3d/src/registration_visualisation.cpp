@@ -74,8 +74,6 @@ int main(int argc, char **argv)
     normals2 = computeSurfaceNormals(cloud2, params.normal_radius);
   }
 
-  visualiseNormals(cloud1, normals1);
-
   /* detect keypoints */
   pcl::console::print_highlight("Detecting keypoints.\n");
   PointCloudPtr keypoints1, keypoints2;
@@ -90,8 +88,6 @@ int main(int argc, char **argv)
   }
   std::cout << "keypoints count: " << keypoints1->points.size() << ", "
             << keypoints2->points.size() << std::endl;
-
-  visualiseKeypoints(cloud1, keypoints1);
 
   /* compute descriptors */
   pcl::console::print_highlight("Computing descriptors.\n");
@@ -108,6 +104,9 @@ int main(int argc, char **argv)
 
   std::cout << "extracted descriptors:" << std::endl;
   printPointCloud2Summary(*descriptors1);
+
+  visualiseNormals(cloud1, normals1);
+  visualiseKeypoints(cloud1, keypoints1);
 
   /* compute correspondences */
   pcl::console::print_highlight("Transform estimation using MATCHING.\n");
