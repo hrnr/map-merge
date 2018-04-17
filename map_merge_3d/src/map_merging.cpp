@@ -136,7 +136,7 @@ static inline std::vector<Eigen::Matrix4f> computeGlobalTransforms(
 }
 
 std::vector<Eigen::Matrix4f> estimateMapsTransforms(
-    const std::vector<PointCloudPtr> &clouds, const MapMergingParams &params)
+    const std::vector<PointCloudConstPtr> &clouds, const MapMergingParams &params)
 {
   // per cloud data extracted for transform estimation
   std::vector<PointCloudPtr> clouds_resized;
@@ -216,7 +216,7 @@ std::vector<Eigen::Matrix4f> estimateMapsTransforms(
   return global_transforms;
 }
 
-PointCloudPtr composeMaps(const std::vector<PointCloudPtr> &clouds,
+PointCloudPtr composeMaps(const std::vector<PointCloudConstPtr> &clouds,
                           const std::vector<Eigen::Matrix4f> &transforms,
                           double resolution)
 {

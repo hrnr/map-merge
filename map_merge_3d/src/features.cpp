@@ -12,7 +12,7 @@
 #include <pcl/keypoints/sift_keypoint.h>
 #include <pcl/point_representation.h>
 
-PointCloudPtr downSample(const PointCloudPtr &input, double resolution)
+PointCloudPtr downSample(const PointCloudConstPtr &input, double resolution)
 {
   pcl::VoxelGrid<PointT> filter;
   filter.setLeafSize(float(resolution), float(resolution), float(resolution));
@@ -26,7 +26,7 @@ PointCloudPtr downSample(const PointCloudPtr &input, double resolution)
 
 /* Use a RadiusOutlierRemoval filter to remove all points with too few local
  * neighbors */
-PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
+PointCloudPtr removeOutliers(const PointCloudConstPtr &input, double radius,
                              int min_neighbors)
 {
   pcl::RadiusOutlierRemoval<PointT> filter;
@@ -40,7 +40,7 @@ PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
   return output;
 }
 
-static PointCloudPtr detectKeypointsSIFT(const PointCloudPtr &points,
+static PointCloudPtr detectKeypointsSIFT(const PointCloudConstPtr &points,
                                          double min_scale, int nr_octaves,
                                          int nr_scales_per_octave,
                                          double min_contrast)
@@ -59,7 +59,7 @@ static PointCloudPtr detectKeypointsSIFT(const PointCloudPtr &points,
   return keypoints;
 }
 
-static PointCloudPtr detectKeypointsHarris(const PointCloudPtr &points,
+static PointCloudPtr detectKeypointsHarris(const PointCloudConstPtr &points,
                                            const SurfaceNormalsPtr &normals,
                                            double threshold, double radius)
 {
@@ -80,7 +80,7 @@ static PointCloudPtr detectKeypointsHarris(const PointCloudPtr &points,
   return keypoints;
 }
 
-PointCloudPtr detectKeypoints(const PointCloudPtr &points,
+PointCloudPtr detectKeypoints(const PointCloudConstPtr &points,
                               const SurfaceNormalsPtr &normals, Keypoint type,
                               double threshold, double radius,
                               double resolution)
@@ -96,7 +96,7 @@ PointCloudPtr detectKeypoints(const PointCloudPtr &points,
 /* implementation for specific descriptor type  */
 template <typename DescriptorExtractor, typename DescriptorT>
 static LocalDescriptorsPtr
-computeLocalDescriptors(const PointCloudPtr &points,
+computeLocalDescriptors(const PointCloudConstPtr &points,
                         const SurfaceNormalsPtr &normals,
                         const PointCloudPtr &keypoints, double feature_radius)
 {
@@ -147,7 +147,7 @@ computeLocalDescriptors(const PointCloudPtr &points,
   return result;
 }
 
-LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
+LocalDescriptorsPtr computeLocalDescriptors(const PointCloudConstPtr &points,
                                             const SurfaceNormalsPtr &normals,
                                             const PointCloudPtr &keypoints,
                                             Descriptor descriptor,
@@ -163,7 +163,7 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
   return dispatchForEachDescriptor(descriptor, functor);
 }
 
-SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,
+SurfaceNormalsPtr computeSurfaceNormals(const PointCloudConstPtr &input,
                                         double radius)
 {
   pcl::NormalEstimation<PointT, NormalT> estimator;

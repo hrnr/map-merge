@@ -29,10 +29,11 @@ struct MapMergingParams {
 };
 std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params);
 
-std::vector<Eigen::Matrix4f> estimateMapsTransforms(
-    const std::vector<PointCloudPtr> &clouds, const MapMergingParams &params);
+std::vector<Eigen::Matrix4f>
+estimateMapsTransforms(const std::vector<PointCloudConstPtr> &clouds,
+                       const MapMergingParams &params);
 
-PointCloudPtr composeMaps(const std::vector<PointCloudPtr> &clouds,
+PointCloudPtr composeMaps(const std::vector<PointCloudConstPtr> &clouds,
                           const std::vector<Eigen::Matrix4f> &transforms,
                           double resolution);
 

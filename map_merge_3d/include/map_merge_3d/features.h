@@ -9,15 +9,15 @@
 // define enum class Descriptor + string conversions
 ENUM_CLASS(Descriptor, DESCRIPTORS_NAMES_);
 
-PointCloudPtr downSample(const PointCloudPtr &input, double resolution);
+PointCloudPtr downSample(const PointCloudConstPtr &input, double resolution);
 
-PointCloudPtr removeOutliers(const PointCloudPtr &input, double radius,
+PointCloudPtr removeOutliers(const PointCloudConstPtr &input, double radius,
                              int min_neighbours);
 
 // defines enum class Keypoint + string conversions
 ENUM_CLASS(Keypoint, SIFT, HARRIS);
 
-PointCloudPtr detectKeypoints(const PointCloudPtr &points,
+PointCloudPtr detectKeypoints(const PointCloudConstPtr &points,
                               const SurfaceNormalsPtr &normals, Keypoint type,
                               double threshold, double radius,
                               double resolution);
@@ -33,7 +33,7 @@ PointCloudPtr detectKeypoints(const PointCloudPtr &points,
  * @param feature_radius search radius for descriptors
  * @return cloud of local descriptors
  */
-LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
+LocalDescriptorsPtr computeLocalDescriptors(const PointCloudConstPtr &points,
                                             const SurfaceNormalsPtr &normals,
                                             const PointCloudPtr &keypoints,
                                             Descriptor descriptor,
@@ -47,7 +47,7 @@ LocalDescriptorsPtr computeLocalDescriptors(const PointCloudPtr &points,
  *
  * @return could of computed normals
  */
-SurfaceNormalsPtr computeSurfaceNormals(const PointCloudPtr &input,
+SurfaceNormalsPtr computeSurfaceNormals(const PointCloudConstPtr &input,
                                         double radius);
 
 #endif  // MAP_MERGE_FEATURES_H_

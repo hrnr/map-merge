@@ -18,7 +18,7 @@ int main(int argc, char **argv)
   std::cout << "params: " << std::endl << params << std::endl;
 
   // load input pointclouds
-  std::vector<PointCloudPtr> clouds;
+  std::vector<PointCloudConstPtr> clouds;
   for (int idx : pcd_file_indices) {
     PointCloudPtr cloud(new PointCloud);
     auto file_name = argv[idx];
