@@ -91,6 +91,9 @@ void MapMerge3d::mapCompositing()
   ROS_DEBUG("Map compositing started.");
 
   std::vector<PointCloudConstPtr> clouds = getMaps();
+  if (clouds.empty()) {
+    return;
+  }
   std::vector<Eigen::Matrix4f> transforms = getTransforms();
   // shrink clouds if we have subscribed some new maps since the last
   // estimation
@@ -110,6 +113,9 @@ void MapMerge3d::transformsEstimation()
 {
   ROS_DEBUG("Transform estimation started.");
   std::vector<PointCloudConstPtr> clouds = getMaps();
+  if (clouds.empty()) {
+    return;
+  }
 
   std::vector<Eigen::Matrix4f> transforms =
       estimateMapsTransforms(clouds, map_merge_params_);
