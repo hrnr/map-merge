@@ -36,6 +36,11 @@ private:
 
   // publishing
   ros::Publisher merged_map_publisher_;
+  // periodical callbacks
+  ros::Timer compositing_timer_;
+  ros::Timer discovery_timer_;
+  ros::Timer estimation_timer_;
+
   // maps robots namespaces to maps. does not own
   std::unordered_map<std::string, MapSubscription*> robots_;
   // owns maps -- iterator safe
@@ -52,12 +57,8 @@ private:
   void mapUpdate(const PointCloud::ConstPtr& msg,
                  MapSubscription& subscription);
 
-  void execute(double rate, void (MapMerge3d::*function)());
-
 public:
   MapMerge3d();
-
-  void spin();
 
   void discovery();
   void mapCompositing();

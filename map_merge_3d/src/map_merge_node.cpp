@@ -24,6 +24,17 @@ MapMerge3d::MapMerge3d() : subscriptions_size_(0)
   /* publishing */
   merged_map_publisher_ =
       node_.advertise<PointCloud>(merged_map_topic, 50, true);
+
+  /* periodical discovery, estimation, compositing */
+  compositing_timer_ =
+      node_.createTimer(ros::Duration(1. / compositing_rate_),
+                        [this](const ros::TimerEvent&) { mapCompositing(); });
+  discovery_timer_ =
+      node_.createTimer(ros::Duration(1. / discovery_rate_),
+                        [this](const ros::TimerEvent&) { discovery(); });
+  estimation_timer_ = node_.createTimer(
+      ros::Duration(1. / estimation_rate_),
+      [this](const ros::TimerEvent&) { transformsEstimation(); });
 }
 
 /*
@@ -165,34 +176,6 @@ bool MapMerge3d::isRobotMapTopic(const ros::master::TopicInfo& topic)
          is_map_topic;
 }
 
-void MapMerge3d::execute(double rate, void (MapMerge3d::*function)())
-{
-  ros::Rate r(rate);
-  while (node_.ok()) {
-    (this->*function)();
-    r.sleep();
-  }
-}
-
-/*
- * spin()
- */
-void MapMerge3d::spin()
-{
-  ros::spinOnce();
-  std::thread compositing_thr(
-      [this]() { execute(compositing_rate_, &MapMerge3d::mapCompositing); });
-  std::thread discovery_thr(
-      [this]() { execute(discovery_rate_, &MapMerge3d::discovery); });
-  std::thread estimation_thr([this]() {
-    execute(estimation_rate_, &MapMerge3d::transformsEstimation);
-  });
-  ros::spin();
-  estimation_thr.join();
-  compositing_thr.join();
-  discovery_thr.join();
-}
-
 }  // namespace map_merge_3d
 
 int main(int argc, char** argv)
@@ -203,7 +186,10 @@ int main(int argc, char** argv)
                                      ros::console::levels::Debug)) {
     ros::console::notifyLoggerLevelsChanged();
   }
+
   map_merge_3d::MapMerge3d map_merge_node;
-  map_merge_node.spin();
+  // use all threads for spinning
+  ros::MultiThreadedSpinner spinner;
+  spinner.spin();
   return 0;
 }
