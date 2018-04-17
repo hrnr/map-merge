@@ -51,10 +51,12 @@ MapMergingParams MapMergingParams::fromCommandLine(int argc, char **argv)
   return params;
 }
 
-std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params) {
+std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params)
+{
   stream << "resolution: " << params.resolution << std::endl;
   stream << "descriptor_radius: " << params.descriptor_radius << std::endl;
-  stream << "outliers_min_neighbours: " << params.outliers_min_neighbours << std::endl;
+  stream << "outliers_min_neighbours: " << params.outliers_min_neighbours
+         << std::endl;
   stream << "normal_radius: " << params.normal_radius << std::endl;
   stream << "keypoint_type: " << params.keypoint_type << std::endl;
   stream << "keypoint_threshold: " << params.keypoint_threshold << std::endl;
@@ -62,11 +64,13 @@ std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params) {
   stream << "estimation_method: " << params.estimation_method << std::endl;
   stream << "refine_transform: " << params.refine_transform << std::endl;
   stream << "inlier_threshold: " << params.inlier_threshold << std::endl;
-  stream << "max_correspondence_distance: " << params.max_correspondence_distance << std::endl;
+  stream << "max_correspondence_distance: "
+         << params.max_correspondence_distance << std::endl;
   stream << "max_iterations: " << params.max_iterations << std::endl;
   stream << "matching_k: " << params.matching_k << std::endl;
   stream << "transform_epsilon: " << params.transform_epsilon << std::endl;
-  stream << "confidence_threshold: " << params.confidence_threshold << std::endl;
+  stream << "confidence_threshold: " << params.confidence_threshold
+         << std::endl;
   stream << "output_resolution: " << params.output_resolution << std::endl;
 
   return stream;
@@ -135,9 +139,14 @@ static inline std::vector<Eigen::Matrix4f> computeGlobalTransforms(
   return global_transforms;
 }
 
-std::vector<Eigen::Matrix4f> estimateMapsTransforms(
-    const std::vector<PointCloudConstPtr> &clouds, const MapMergingParams &params)
+std::vector<Eigen::Matrix4f>
+estimateMapsTransforms(const std::vector<PointCloudConstPtr> &clouds,
+                       const MapMergingParams &params)
 {
+  if (clouds.empty()) {
+    return {};
+  }
+
   // per cloud data extracted for transform estimation
   std::vector<PointCloudPtr> clouds_resized;
   std::vector<SurfaceNormalsPtr> normals;
@@ -220,6 +229,10 @@ PointCloudPtr composeMaps(const std::vector<PointCloudConstPtr> &clouds,
                           const std::vector<Eigen::Matrix4f> &transforms,
                           double resolution)
 {
+  if (clouds.empty()) {
+    return nullptr;
+  }
+
   if (clouds.size() != transforms.size()) {
     throw new std::runtime_error("composeMaps: clouds and transforms size must "
                                  "be the same.");
