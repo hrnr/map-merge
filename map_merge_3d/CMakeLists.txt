@@ -61,6 +61,16 @@ target_link_libraries(map_merge_tool
   ${catkin_LIBRARIES}
 )
 
+# ROS node for online merging
+add_executable(map_merge_node
+  src/map_merge_node.cpp
+)
+add_dependencies(map_merge_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(map_merge_node
+  map_merging
+  ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##
