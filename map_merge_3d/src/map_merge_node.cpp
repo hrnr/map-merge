@@ -81,6 +81,8 @@ void MapMerge3d::discovery()
           mapUpdate(msg, subscription);
         });
   }
+
+  ROS_DEBUG("Robot discovery finished.");
 }
 
 /*
@@ -105,8 +107,13 @@ void MapMerge3d::mapCompositing()
     return;
   }
 
-  ROS_DEBUG("all maps merged, publishing");
+  std_msgs::Header header;
+  header.frame_id = world_frame_;
+  header.stamp = ros::Time::now();
+  pcl_conversions::toPCL(header, merged_map->header);
   merged_map_publisher_.publish(merged_map);
+
+  ROS_DEBUG("Map compositing finished.");
 }
 
 void MapMerge3d::transformsEstimation()
@@ -125,6 +132,8 @@ void MapMerge3d::transformsEstimation()
     std::lock_guard<std::mutex> lock(subscriptions_mutex_);
     transforms_ = transforms;
   }
+
+  ROS_DEBUG("Transform estimation finished.");
 }
 
 void MapMerge3d::mapUpdate(const PointCloud::ConstPtr& msg,
