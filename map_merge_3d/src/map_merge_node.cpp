@@ -129,7 +129,7 @@ void MapMerge3d::transformsEstimation()
 
   // set transforms thread-safe
   {
-    std::lock_guard<std::mutex> lock(subscriptions_mutex_);
+    std::lock_guard<std::mutex> lock(transforms_mutex_);
     transforms_ = transforms;
   }
 
@@ -160,7 +160,7 @@ std::vector<PointCloudConstPtr> MapMerge3d::getMaps()
 
 std::vector<Eigen::Matrix4f> MapMerge3d::getTransforms()
 {
-  std::lock_guard<std::mutex> lock(subscriptions_mutex_);
+  std::lock_guard<std::mutex> lock(transforms_mutex_);
   return transforms_;
 }
 
