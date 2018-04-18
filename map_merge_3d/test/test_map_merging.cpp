@@ -35,7 +35,7 @@ TEST(composeMaps, one)
   PointCloudPtr result = composeMaps({PointCloudConstPtr(new PointCloud)},
                                      {Matrix4f::Identity()}, 0.0);
   EXPECT_NE(result, nullptr);
-  EXPECT_EQ(result->points.size(), 0);
+  EXPECT_EQ(result->size(), 0);
 }
 
 int main(int argc, char** argv)

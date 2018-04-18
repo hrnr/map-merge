@@ -38,8 +38,8 @@ int main(int argc, char **argv)
     pcl::console::print_error("Error loading input file!\n");
     return -1;
   }
-  std::cout << "loaded pointclouds of sizes: " << cloud1->points.size() << ", "
-            << cloud2->points.size() << std::endl;
+  std::cout << "loaded pointclouds of sizes: " << cloud1->size() << ", "
+            << cloud2->size() << std::endl;
 
   pcl::console::print_highlight("Downsampling to working resolution.\n");
   {
@@ -47,8 +47,8 @@ int main(int argc, char **argv)
     cloud1 = downSample(cloud1, params.resolution);
     cloud2 = downSample(cloud2, params.resolution);
   }
-  std::cout << "downsampled clouds to: " << cloud1->points.size() << ", "
-            << cloud2->points.size() << std::endl;
+  std::cout << "downsampled clouds to: " << cloud1->size() << ", "
+            << cloud2->size() << std::endl;
 
   visualisePointCloud(cloud1);
 
@@ -60,8 +60,8 @@ int main(int argc, char **argv)
     cloud2 = removeOutliers(cloud2, params.descriptor_radius,
                             params.outliers_min_neighbours);
   }
-  std::cout << "remaining points: " << cloud1->points.size() << ", "
-            << cloud2->points.size() << std::endl;
+  std::cout << "remaining points: " << cloud1->size() << ", " << cloud2->size()
+            << std::endl;
 
   visualisePointCloud(cloud1);
 
@@ -86,8 +86,8 @@ int main(int argc, char **argv)
                                  params.keypoint_threshold,
                                  params.normal_radius, params.resolution);
   }
-  std::cout << "keypoints count: " << keypoints1->points.size() << ", "
-            << keypoints2->points.size() << std::endl;
+  std::cout << "keypoints count: " << keypoints1->size() << ", "
+            << keypoints2->size() << std::endl;
 
   /* compute descriptors */
   pcl::console::print_highlight("Computing descriptors.\n");

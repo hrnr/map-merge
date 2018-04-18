@@ -201,7 +201,7 @@ estimateMapsTransforms(const std::vector<PointCloudConstPtr> &clouds,
   // generate pairs
   for (size_t i = 0; i < clouds.size() - 1; ++i) {
     for (size_t j = i + 1; j < clouds.size(); ++j) {
-      if (keypoints[i]->points.size() > 0 && keypoints[j]->points.size() > 0) {
+      if (keypoints[i]->size() > 0 && keypoints[j]->size() > 0) {
         pairwise_transforms.emplace_back(i, j);
       }
     }

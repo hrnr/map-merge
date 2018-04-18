@@ -138,7 +138,7 @@ computeLocalDescriptors(const PointCloudConstPtr &points,
   filter_keypoints.setNegative(true);
   filter_keypoints.filter(*keypoints);
 
-  assert(keypoints->points.size() == descriptors->points.size());
+  assert(keypoints->size() == descriptors->size());
 
   // convert to PointCloud2 which is able to hold any descriptors data
   LocalDescriptorsPtr result(new LocalDescriptors);
