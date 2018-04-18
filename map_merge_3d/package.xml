@@ -15,4 +15,7 @@
 
   <depend>roscpp</depend>
   <depend>pcl_ros</depend>
+
+  <test_depend>rosunit</test_depend>
+  <test_depend>roslaunch</test_depend>
 </package>
