@@ -146,6 +146,9 @@ estimateMapsTransforms(const std::vector<PointCloudConstPtr> &clouds,
   if (clouds.empty()) {
     return {};
   }
+  if (clouds.size() == 1) {
+    return {Eigen::Matrix4f::Identity()};
+  }
 
   // per cloud data extracted for transform estimation
   std::vector<PointCloudPtr> clouds_resized;
