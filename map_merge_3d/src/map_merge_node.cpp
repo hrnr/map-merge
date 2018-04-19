@@ -1,10 +1,9 @@
 #include <map_merge_3d/map_merge_node.h>
 
-#include <thread>
-
 #include <pcl_ros/point_cloud.h>
 #include <ros/assert.h>
 #include <ros/console.h>
+#include <tf2_eigen/tf2_eigen.h>
 
 namespace map_merge_3d
 {
@@ -12,6 +11,7 @@ MapMerge3d::MapMerge3d() : subscriptions_size_(0)
 {
   ros::NodeHandle private_nh("~");
   std::string merged_map_topic;
+  bool publish_tf = true;
 
   private_nh.param("compositing_rate", compositing_rate_, 4.0);
   private_nh.param("discovery_rate", discovery_rate_, 0.05);
@@ -20,6 +20,7 @@ MapMerge3d::MapMerge3d() : subscriptions_size_(0)
   private_nh.param<std::string>("robot_namespace", robot_namespace_, "");
   private_nh.param<std::string>("merged_map_topic", merged_map_topic, "map");
   private_nh.param<std::string>("world_frame", world_frame_, "world");
+  private_nh.param("publish_tf", publish_tf, true);
 
   /* publishing */
   merged_map_publisher_ =
@@ -35,6 +36,17 @@ MapMerge3d::MapMerge3d() : subscriptions_size_(0)
   estimation_timer_ = node_.createTimer(
       ros::Duration(1. / estimation_rate_),
       [this](const ros::TimerEvent&) { transformsEstimation(); });
+
+  // tf needs to publish at constant frequency to avoid transform lookup fails
+  if (publish_tf) {
+    tf_thread_ = std::thread([this]() {
+      ros::Rate rate(30.0);
+      while (node_.ok()) {
+        publishTF();
+        rate.sleep();
+      }
+    });
+  }
 }
 
 /*
@@ -132,6 +144,8 @@ void MapMerge3d::transformsEstimation()
     std::lock_guard<std::mutex> lock(transforms_mutex_);
     transforms_ = transforms;
   }
+  // notify tf publisher that transforms changed
+  tf_current_flag_.clear();
 
   ROS_DEBUG("Transform estimation finished.");
 }
@@ -189,6 +203,47 @@ bool MapMerge3d::isRobotMapTopic(const ros::master::TopicInfo& topic)
 
   return is_occupancy_grid && !is_our_topic && contains_robot_namespace &&
          is_map_topic;
+}
+
+static inline std::vector<geometry_msgs::TransformStamped> computeTFTransforms(
+    const std::vector<Eigen::Matrix4f>& transforms,
+    const std::vector<PointCloudConstPtr>& maps, const std::string& world_frame)
+{
+  std::vector<geometry_msgs::TransformStamped> result;
+  result.reserve(transforms.size());
+  // convert to ROS transforms
+  for (const auto& transform : transforms) {
+    Eigen::Affine3d affine;
+    affine.matrix() = transform.cast<double>();
+    result.emplace_back(tf2::eigenToTransform(affine));
+  }
+  // fill frame_ids
+  for (size_t i = 0; i < result.size(); ++i) {
+    result[i].header.frame_id = world_frame;
+    result[i].child_frame_id = maps[i]->header.frame_id;
+  }
+
+  return result;
+}
+
+void MapMerge3d::publishTF()
+{
+  if (!tf_current_flag_.test_and_set()) {
+    // need to recalculate stored transforms
+    auto transforms = getTransforms();  // this is thread-safe access
+    auto maps = getMaps();
+    tf_transforms_ = computeTFTransforms(transforms, maps, world_frame_);
+  }
+  if (tf_transforms_.empty()) {
+    return;
+  }
+
+  // no locking. tf_transforms_ is always accessed only from tf thread
+  ros::Time now = ros::Time::now();
+  for (auto& transform : tf_transforms_) {
+    transform.header.stamp = now;
+  }
+  tf_publisher_.sendTransform(tf_transforms_);
 }
 
 }  // namespace map_merge_3d

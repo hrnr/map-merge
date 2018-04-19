@@ -1,11 +1,14 @@
 #ifndef MAP_MERGE_MAP_MERGE_NODE_H_
 #define MAP_MERGE_MAP_MERGE_NODE_H_
 
+#include <atomic>
 #include <forward_list>
 #include <mutex>
+#include <thread>
 #include <unordered_map>
 
 #include <ros/ros.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 #include <map_merge_3d/map_merging.h>
 #include <map_merge_3d/typedefs.h>
@@ -40,6 +43,12 @@ private:
   ros::Timer compositing_timer_;
   ros::Timer discovery_timer_;
   ros::Timer estimation_timer_;
+  // transforms for tf
+  std::vector<geometry_msgs::TransformStamped> tf_transforms_;
+  tf2_ros::TransformBroadcaster tf_publisher_;
+  std::thread tf_thread_;             //  tf needs it own thread
+  std::atomic_flag tf_current_flag_;  // whether tf_transforms_ are up to date
+                                      // with transforms_
 
   // maps robots namespaces to maps. does not own
   std::unordered_map<std::string, MapSubscription*> robots_;
@@ -53,9 +62,9 @@ private:
 
   std::string robotNameFromTopic(const std::string& topic);
   bool isRobotMapTopic(const ros::master::TopicInfo& topic);
-
   void mapUpdate(const PointCloud::ConstPtr& msg,
                  MapSubscription& subscription);
+  void publishTF();
 
 public:
   MapMerge3d();

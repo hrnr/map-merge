@@ -9,6 +9,8 @@ add_compile_options(-std=c++14)
 find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   roscpp
+  tf2_eigen
+  tf2_ros
 )
 
 ################################################

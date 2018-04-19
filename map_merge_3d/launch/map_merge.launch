@@ -5,9 +5,10 @@
     <param name="robot_namespace" value=""/>
     <param name="merged_map_topic" value="map"/>
     <param name="world_frame" value="world"/>
-    <param name="compositing_rate" value="0.5"/>
+    <param name="compositing_rate" value="0.3"/>
     <param name="discovery_rate" value="0.05"/>
-    <param name="estimation_rate" value="0.1"/>
+    <param name="estimation_rate" value="0.01"/>
+    <param name="publish_tf" value="true"/>
     <!-- and all the other map merging parameters -->
   </node>
 </group>
