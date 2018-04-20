@@ -1,7 +1,7 @@
 <launch>
-  <arg name="pcd1"/>
-  <arg name="pcd2"/>
-  <arg name="rviz" default="true"/>
+  <arg name="pcd1" default="robot1.pcd"/>
+  <arg name="pcd2" default="robot2.pcd"/>
+  <arg name="rviz" default="false"/>
 
   <include file="$(find map_merge_3d)/launch/map_merge.launch"/>
 
