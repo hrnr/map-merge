@@ -2,7 +2,8 @@
 <package format="2">
   <name>map_merge_3d</name>
   <version>0.0.0</version>
-  <description>The map_merge_3d package</description>
+  <description>Merging multiple 3D maps, represented as pointclouds,
+  without knowledge of initial positions of robots.</description>
 
   <author email="laeqten@gmail.com">Jiri Horner</author>
   <maintainer email="laeqten@gmail.com">Jiri Horner</maintainer>
