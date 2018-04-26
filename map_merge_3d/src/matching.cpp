@@ -9,6 +9,8 @@
 #include <pcl/registration/transformation_validation_euclidean.h>
 #include <pcl/search/kdtree.h>
 
+namespace map_merge_3d
+{
 /**
  * @brief Throws an exception if inputs are not containing valid descriptors set
  * for matching
@@ -121,7 +123,7 @@ Eigen::Matrix4f estimateTransformFromCorrespondences(
   ransac.setInlierThreshold(inlier_threshold);
   ransac.getCorrespondences(*inliers);
 
-  // check if we succeded to find a model. unfortunately there is not a better
+  // check if we succeded to find a model. unfortunately there is no better
   // way.
   if (ransac.getBestTransformation().isIdentity()) {
     // ransac failed to find a resonable model
@@ -264,3 +266,5 @@ double transformScore(const PointCloudPtr &source_points,
   return validator.validateTransformation(source_points, target_points,
                                           transform);
 }
+
+}  // namespace map_merge_3d

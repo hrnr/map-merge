@@ -15,16 +15,30 @@
 
 namespace map_merge_3d
 {
-struct MapSubscription {
-  // protects map
-  std::mutex mutex;
-  PointCloudConstPtr map;
-  ros::Subscriber map_sub;
-};
+/**
+ * @defgroup node ROS node
+ * @brief ROS interface.
+ * @details Manages maps discovery, transforms estimation and the global
+ * map publishing.
+ * @{
+ */
 
+/**
+ * @brief ROS node class.
+ * @details Runs robot discovery, transforms estimation and map compositing at
+ * predefined rates (from ROS parameters). Does not spin on its own.
+ *
+ */
 class MapMerge3d
 {
 private:
+  struct MapSubscription {
+    // protects map
+    std::mutex mutex;
+    PointCloudConstPtr map;
+    ros::Subscriber map_sub;
+  };
+
   ros::NodeHandle node_;
 
   /* node parameters */
@@ -69,10 +83,23 @@ private:
 public:
   MapMerge3d();
 
-  void discovery();
-  void mapCompositing();
   /**
-   * @brief Estimates initial positions of maps
+   * @brief Initiates discovery of new robots (maps) under current ROS core.
+   * @details When new maps topics are found, there are added for merging. This
+   * function is thread-safe
+   */
+  void discovery();
+
+  /**
+   * @brief Composes and publishes the global map based on estimated
+   * transformations
+   * @details This function is thread-safe
+   */
+  void mapCompositing();
+
+  /**
+   * @brief Estimates transformations between maps
+   * @details This function is thread-safe
    */
   void transformsEstimation();
 
@@ -85,13 +112,15 @@ public:
 
   /**
    * @brief Get currently stored transforms. For each map there should be a
-   * trasform between map and global reference frame.
+   * transform between map and global reference frame.
    * @details This function is thread-safe
    * @return all currently estimated transforms. Zero Matrix if transform could
    * not be estimated.
    */
   std::vector<Eigen::Matrix4f> getTransforms();
 };
+
+///@} group node
 
 }  // namespace map_merge_3d
 

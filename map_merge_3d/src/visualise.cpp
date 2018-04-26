@@ -3,6 +3,8 @@
 #include <pcl/common/transforms.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+namespace map_merge_3d
+{
 // use just one instance of vis to overcome bug PCL #172
 static pcl::visualization::PCLVisualizer vis("cloud view");
 
@@ -91,3 +93,5 @@ void visualiseCorrespondences(PointCloudPtr cloud1, PointCloudPtr keypoints1,
 
   show();
 }
+
+}  // namespace map_merge_3d

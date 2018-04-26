@@ -5,6 +5,8 @@
 #include <pcl/common/transforms.h>
 #include <pcl/console/parse.h>
 
+namespace map_merge_3d
+{
 MapMergingParams MapMergingParams::fromCommandLine(int argc, char **argv)
 {
   MapMergingParams params;
@@ -257,3 +259,5 @@ PointCloudPtr composeMaps(const std::vector<PointCloudConstPtr> &clouds,
 
   return result;
 }
+
+}  // namespace map_merge_3d

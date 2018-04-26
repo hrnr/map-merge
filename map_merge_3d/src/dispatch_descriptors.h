@@ -1,6 +1,8 @@
 #ifndef MAP_MERGE_DISPATCH_H_
 #define MAP_MERGE_DISPATCH_H_
 
+/// @cond DOXYGEN_SKIP
+
 #include <map_merge_3d/features.h>
 
 #include <tuple>
@@ -18,6 +20,8 @@ features.h (though DESCRIPTORS_NAMES_) and declare below required types using
 DECLARE_DESCRIPTOR_TYPE. Let the rest be worked out by the macro/template magic.
 */
 
+namespace map_merge_3d
+{
 // put implementation under anonymous namespace to protect *DescriptorType types
 namespace
 {
@@ -115,5 +119,9 @@ static decltype(auto) dispatchForEachDescriptor(Descriptor descriptor,
       descriptor, f);
 }
 #undef PREPEND_DESCRIPTOR
+
+}  // namespace map_merge_3d
+
+/// @endcond DOXYGEN_SKIP
 
 #endif  // MAP_MERGE_DISPATCH_H_

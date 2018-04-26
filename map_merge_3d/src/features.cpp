@@ -12,6 +12,8 @@
 #include <pcl/keypoints/sift_keypoint.h>
 #include <pcl/point_representation.h>
 
+namespace map_merge_3d
+{
 PointCloudPtr downSample(const PointCloudConstPtr &input, double resolution)
 {
   pcl::VoxelGrid<PointT> filter;
@@ -175,3 +177,5 @@ SurfaceNormalsPtr computeSurfaceNormals(const PointCloudConstPtr &input,
 
   return normals;
 }
+
+}  // namespace map_merge_3d

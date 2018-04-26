@@ -7,6 +7,8 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
 
+namespace map_merge_3d
+{
 // setup some typedefs for working with RGB pointclouds
 
 // basic pointclouds definitions
@@ -32,5 +34,7 @@ using pcl::CorrespondencesPtr;
 
 // color handler for visualisation
 typedef pcl::visualization::PointCloudColorHandlerCustom<PointT> ColorHandlerT;
+
+}  // namespace map_merge_3d
 
 #endif  // MAP_MERGE_TYPEDEFS_H_

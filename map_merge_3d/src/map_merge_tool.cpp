@@ -3,6 +3,8 @@
 #include <pcl/console/parse.h>
 #include <pcl/io/pcd_io.h>
 
+using namespace map_merge_3d;
+
 int main(int argc, char **argv)
 {
   std::vector<int> pcd_file_indices =

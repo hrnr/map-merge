@@ -9,8 +9,7 @@
   <maintainer email="laeqten@gmail.com">Jiri Horner</maintainer>
 
   <license>BSD</license>
-  <!-- TODO -->
-  <!-- <url type="website">http://wiki.ros.org/map_merge_3d</url> -->
+  <url type="website">http://wiki.ros.org/map_merge_3d</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

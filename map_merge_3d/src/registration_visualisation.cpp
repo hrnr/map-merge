@@ -9,6 +9,8 @@
 #include <pcl/console/parse.h>
 #include <pcl/io/pcd_io.h>
 
+using namespace map_merge_3d;
+
 static inline void printPointCloud2Summary(const pcl::PCLPointCloud2 &v)
 {
   for (size_t i = 0; i < v.fields.size(); ++i) {

@@ -5,6 +5,8 @@
  * Support for enum  with string conversions.
  */
 
+/// @cond DOXYGEN_SKIP
+
 #include <ostream>
 #include <type_traits>
 
@@ -63,5 +65,7 @@
     stream << enums::to_string(value);                                         \
     return stream;                                                             \
   }
+
+/// @endcond DOXYGEN_SKIP
 
 #endif  // MAP_MERGE_ENUM_H_
