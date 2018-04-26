@@ -1,5 +1,5 @@
-#include <map_merge_3d/dispatch.h>
 #include <map_merge_3d/matching.h>
+#include "dispatch_descriptors.h"
 
 #include <pcl/conversions.h>
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>

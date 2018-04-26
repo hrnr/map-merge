@@ -1,6 +1,10 @@
 #ifndef MAP_MERGE_ENUM_H_
 #define MAP_MERGE_ENUM_H_
 
+/**
+ * Support for enum  with string conversions.
+ */
+
 #include <ostream>
 #include <type_traits>
 

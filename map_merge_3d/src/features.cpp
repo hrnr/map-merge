@@ -1,5 +1,5 @@
-#include <map_merge_3d/dispatch.h>
 #include <map_merge_3d/features.h>
+#include "dispatch_descriptors.h"
 
 #include <algorithm>
 

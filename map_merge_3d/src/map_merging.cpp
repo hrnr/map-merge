@@ -1,6 +1,6 @@
 #include <map_merge_3d/features.h>
-#include <map_merge_3d/graph.h>
 #include <map_merge_3d/map_merging.h>
+#include "graph.h"
 
 #include <pcl/common/transforms.h>
 #include <pcl/console/parse.h>

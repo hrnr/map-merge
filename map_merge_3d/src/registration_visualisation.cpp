@@ -3,7 +3,7 @@
 #include <map_merge_3d/features.h>
 #include <map_merge_3d/map_merging.h>
 #include <map_merge_3d/matching.h>
-#include <map_merge_3d/visualise.h>
+#include "visualise.h"
 
 #include <pcl/common/time.h>
 #include <pcl/console/parse.h>

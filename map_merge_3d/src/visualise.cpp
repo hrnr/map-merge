@@ -1,4 +1,4 @@
-#include <map_merge_3d/visualise.h>
+#include "visualise.h"
 
 #include <pcl/common/transforms.h>
 #include <pcl/visualization/pcl_visualizer.h>

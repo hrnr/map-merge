@@ -1,4 +1,4 @@
-#include <map_merge_3d/graph.h>
+#include "graph.h"
 
 #include <algorithm>
 #include <cassert>
