@@ -13,9 +13,9 @@ MapMerge3d::MapMerge3d() : subscriptions_size_(0)
   std::string merged_map_topic;
   bool publish_tf = true;
 
-  private_nh.param("compositing_rate", compositing_rate_, 4.0);
+  private_nh.param("compositing_rate", compositing_rate_, 0.3);
   private_nh.param("discovery_rate", discovery_rate_, 0.05);
-  private_nh.param("estimation_rate", estimation_rate_, 0.5);
+  private_nh.param("estimation_rate", estimation_rate_, 0.01);
   private_nh.param<std::string>("robot_map_topic", robot_map_topic_, "map");
   private_nh.param<std::string>("robot_namespace", robot_namespace_, "");
   private_nh.param<std::string>("merged_map_topic", merged_map_topic, "map");
