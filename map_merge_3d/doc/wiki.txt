@@ -1,0 +1,100 @@
+<<PackageHeader(map_merge_3d)>>
+
+<<GitHubIssues(hrnr/map-merge)>>
+
+<<TOC(4)>>
+
+== Overview ==
+This package provides a 3D global map for multiple robots and the respective transformations between robots. It merges robots individual maps based on the overlapping space in the maps and requires no dependencies on a particular SLAM or communication between the robots.
+
+{{attachment:screenshot.jpg||width="755px"}}
+
+The ROS node can merge maps from the arbitrary number of robots. It expects maps from individual robots as ROS topics and does impose any particular messaging between robots. If your run multiple robots under the same ROS master then {{{map_merge_3d}}} will probably work for you out-of-the-box, this makes it easy to setup a simulation experiment.
+
+In the multi-robot exploration scenario your robots will probably run multiple ROS masters and you need to setup a communication between robots. Common solution might be [[multimaster_fkie]]. You need to provide maps from your robots on local topics (under the same master). Also if you want to distribute merged map and [[tf]] transformations back to robots your communication must take care of it.
+
+# TODO video
+
+== Architecture ==
+
+{{{map_merge_3d}}} finds robot maps automatically and new robots can be added to the system at any time. 3D maps are expected as <<MsgLink(sensor_msgs/PointCloud2)>>, other map messages are not supported.
+
+{{attachment:architecture.svg||width="755px"}}
+
+Recommended topics names for robot maps are `/robot1/map`, `/robot2/map` etc. However the names are configurable. All robots are expected to publish map under `<robot_namespace>/map`, where topic name (`map`) is configurable, but must be same for all robots. For each robot `<robot_namespace>` will be of cause different, but does not need to follow any pattern. Further, you can exclude some topics using `robot_namespace` parameter, to avoid merging unrelated pointclouds.
+
+== Estimation ==
+
+Transformations between maps are estimated by feature-matching algorithm and therefore it is required to have sufficient amount of overlapping space between maps to make a high-probability match. If maps don't have enough overlapping space to make a solid match, merger might reject those matches.
+
+Estimating transforms between maps is cpu-intesive so you might want to tune `estimation_rate` parameter to run re-estimation less often.
+
+== ROS API ==
+{{{
+#!clearsilver CS/NodeAPI
+
+name = map_merge
+desc = Provides map merging services offered by this package. Dynamically looks for new robots in the system and merges their maps. Provides tf transforms.
+
+pub {
+  0.name  = map
+  0.type = sensor_msgs/PointCloud2
+  0.desc = Merged map from all robots in the system.
+}
+sub {
+  0.name = <robot_namespace>/map
+  0.type = sensor_msgs/PointCloud2
+  0.desc = Local map for specific robot.
+}
+
+param {
+  0.name = ~robot_map_topic
+  0.default = `map`
+  0.type = string
+  0.desc = Name of robot map topic without namespaces (last component of topic name). Only topics with this name will be considered when looking for new maps to merge. This topics may be subject to further filtering (see below).
+
+  1.name = ~robot_namespace
+  1.default =  `<empty string>`
+  1.type = string
+  1.desc = Fixed part of robot map topic. You can employ this parameter to further limit which topics will be considered during dynamic lookup for robots. Only topics which contain (anywhere) this string will be considered for lookup. Unlike `robot_map_topic` you are not limited by namespace logic. Topics will be filtered using text-based search. Therefore `robot_namespace` does not need to be ROS namespace, but can contain slashes etc. This must be common part of all robots map topics name (all robots for which you want to merge map).
+
+  2.name = ~merged_map_topic
+  2.default = `map`
+  2.type = string
+  2.desc = Topic name where merged map will be published.
+
+  3.name = ~world_frame
+  3.default = `world`
+  3.type = string
+  3.desc = Frame id (in [[tf]] tree) which will be assigned to published merged map and used as reference frame for tf transforms.
+
+  4.name = ~compositing_rate
+  4.default = `0.3`
+  4.type = double
+  4.desc = Rate in Hz. Basic frequency on which the node merges robots maps and publish merged map. Increase this value if you want faster updates.
+
+  5.name = ~discovery_rate
+  5.default = `0.05`
+  5.type = double
+  5.desc = Rate in Hz. Frequency on which this node discovers new robots (maps). Increase this value if you need more agile behaviour when adding new robots. Robots will be discovered sooner.
+
+  6.name = ~estimation_rate
+  6.default = `0.01`
+  6.type = double
+  6.desc = Rate in Hz. Frequency on which this node re-estimates transformations between maps. Estimation is cpu-intensive, so you may wish to lower this value.
+
+  7.name = ~publish_tf
+  7.default = `true`
+  7.type = bool
+  7.desc = Whether to publish estimated transforms in [[tf]] tree. See below.
+}
+}
+}}}
+
+== Acknowledgements ==
+
+This package was developed as part of my master thesis at [[http://www.mff.cuni.cz/to.en/|Charles University]] in Prague.
+
+
+## AUTOGENERATED DON'T DELETE
+## CategoryPackage
