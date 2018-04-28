@@ -88,6 +88,12 @@ param {
   7.type = bool
   7.desc = Whether to publish estimated transforms in [[tf]] tree. See below.
 }
+
+prov_tf {
+  0.from = world
+  0.to   = mapX_frame
+  0.desc = Transformation from the world frame (which name can be configured using `world_frame` parameter) to each of the maps. Each map must have a correct `frame_id` set (instead `mapX_frame`) in the <<MsgLink(sensor_msgs/PointCloud2)>> message. If the transformation could not be estimated, null transformation will be published.
+}
 }
 }}}
 
