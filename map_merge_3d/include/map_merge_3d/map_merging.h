@@ -7,6 +7,8 @@
 #include <map_merge_3d/matching.h>
 #include <map_merge_3d/typedefs.h>
 
+#include <ros/ros.h>
+
 namespace map_merge_3d
 {
 /**
@@ -54,6 +56,17 @@ struct MapMergingParams {
    * not provided.
    */
   static MapMergingParams fromCommandLine(int argc, char **argv);
+
+  /**
+   * @brief Sources parameters from ROS node parameters
+   * @details Parameter names are the same as the struct
+   * member.
+   *
+   * @param node ROS node to source parameters from
+   * @return parameters with values from ROS params of default values where
+   * not provided.
+   */
+  static MapMergingParams fromROSNode(const ros::NodeHandle &node);
 };
 std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params);
 

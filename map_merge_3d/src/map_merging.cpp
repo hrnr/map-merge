@@ -53,6 +53,50 @@ MapMergingParams MapMergingParams::fromCommandLine(int argc, char **argv)
   return params;
 }
 
+MapMergingParams MapMergingParams::fromROSNode(const ros::NodeHandle &n)
+{
+  MapMergingParams params;
+
+  n.getParam("resolution", params.resolution);
+  n.getParam("descriptor_radius", params.descriptor_radius);
+  n.getParam("outliers_min_neighbours",
+                 params.outliers_min_neighbours);
+  n.getParam("normal_radius", params.normal_radius);
+  std::string keypoint_type;
+  n.getParam("keypoint_type", keypoint_type);
+  if (!keypoint_type.empty()) {
+    params.keypoint_type = enums::from_string<Keypoint>(keypoint_type);
+  }
+  n.getParam("keypoint_threshold", params.keypoint_threshold);
+  std::string descriptor_type;
+  n.getParam("descriptor_type", descriptor_type);
+  if (!descriptor_type.empty()) {
+    params.descriptor_type = enums::from_string<Descriptor>(descriptor_type);
+  }
+  std::string estimation_method;
+  n.getParam("estimation_method", estimation_method);
+  if (!estimation_method.empty()) {
+    params.estimation_method =
+        enums::from_string<EstimationMethod>(estimation_method);
+  }
+  n.getParam("refine_transform", params.refine_transform);
+  n.getParam("inlier_threshold", params.inlier_threshold);
+  n.getParam("max_correspondence_distance",
+                 params.max_correspondence_distance);
+  n.getParam("max_iterations", params.max_iterations);
+  int matching_k = -1;
+  n.getParam("matching_k", matching_k);
+  if (matching_k > 0) {
+    params.matching_k = size_t(matching_k);
+  }
+  n.getParam("transform_epsilon", params.transform_epsilon);
+  n.getParam("confidence_threshold",
+                 params.confidence_threshold);
+  n.getParam("output_resolution", params.output_resolution);
+
+  return params;
+}
+
 std::ostream &operator<<(std::ostream &stream, const MapMergingParams &params)
 {
   stream << "resolution: " << params.resolution << std::endl;

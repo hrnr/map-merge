@@ -21,6 +21,8 @@ MapMerge3d::MapMerge3d() : subscriptions_size_(0)
   private_nh.param<std::string>("merged_map_topic", merged_map_topic, "map");
   private_nh.param<std::string>("world_frame", world_frame_, "world");
   private_nh.param("publish_tf", publish_tf, true);
+  // registration parameters
+  map_merge_params_ = MapMergingParams::fromROSNode(private_nh);
 
   /* publishing */
   merged_map_publisher_ =
