@@ -1,0 +1,24 @@
+/**
+@mainpage
+@htmlinclude manifest.html
+
+@b map_merge_3d provides services for merging 3D maps represented as pointclouds.
+
+This package contains ROS node, two tools for offline merging of pcd files and a library API.
+
+This library use PCL to manipulate pointclouds.
+
+@section high_level High-level interface
+
+Simple to use interface for merging arbitrary number of maps. You need just
+
+- map_merge_3d::estimateMapsTransforms to estimate transformations between maps
+- map_merge_3d::composeMaps to stitch the global map
+
+See @ref map_merging
+
+@section low_level Low-level interface
+
+Modules @ref features and @ref matching provide functions for extracting features, keypoints and various functions for estimating transformations. Those functions might come handy if you want to do custom pre- or post-processing.
+
+*/
