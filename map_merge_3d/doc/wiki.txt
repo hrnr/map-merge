@@ -187,6 +187,40 @@ prov_tf {
 }
 }}}
 
+== Tools ==
+
+Alongside ROS node {{{map_merge_3d}}} provides command-line tools to work with pointcloud maps saved in `pcd` files. Both tools accept any of the [[#REGISTRATION PARAMETERS]].
+
+The tools use PCL command-line parsing module. PCL command-line parsing has some limits (PCL users won't be surprised): it supports only `--param value` format, `--param=value` is not accepted. Unknown options are ignored. Options may be arbitrarily mixed with filenames. There are no short versions for parameters.
+
+=== map_merge_tool ===
+
+Tool for merging maps offline. Produces `output.pcd` with merged global map. This tool can merge arbitrary number of maps.
+
+==== Usage ====
+
+{{{
+rosrun map_merge_3d map_merge_tool [--param value] map1.pcd map2.pcd [map3.pcd...]
+}}}
+
+For example to use SHOT descriptors with 3 maps:
+
+{{{
+rosrun map_merge_3d map_merge_tool --descriptor_type SHOT map1.pcd map2.pcd map3.pcd
+}}}
+
+=== registration_visualisation ===
+
+Visualises pairwise transform estimation between 2 maps. Uses PCL visualiser for visualisation.
+
+==== Usage ====
+
+{{{
+rosrun map_merge_3d registration_visualisation [--param value] map1.pcd map2.pcd
+}}}
+
+After one step of estimation a visualisation window appears. You can freely navigate the pointcloud, save screenshot or camera parameters (press `h` to see all shortcuts). After the window is closed, estimation continues with the next phase and next visualisation window appears. Details about estimation progress are printed to `stdout`.
+
 == Acknowledgements ==
 
 This package was developed as part of my master thesis at [[http://www.mff.cuni.cz/to.en/|Charles University]] in Prague.
