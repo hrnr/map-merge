@@ -31,23 +31,26 @@ int main(int argc, char **argv)
   const MapMergingParams params = MapMergingParams::fromCommandLine(argc, argv);
   std::cout << "params: " << std::endl << params << std::endl;
 
-  PointCloudPtr cloud1(new PointCloud);
-  PointCloudPtr cloud2(new PointCloud);
+  PointCloudPtr cloud1_full(new PointCloud);
+  PointCloudPtr cloud2_full(new PointCloud);
+  PointCloudPtr cloud1, cloud2;
 
   // load input pcd files
-  if (pcl::io::loadPCDFile<PointT>(argv[pcd_file_indices[0]], *cloud1) < 0 ||
-      pcl::io::loadPCDFile<PointT>(argv[pcd_file_indices[1]], *cloud2) < 0) {
+  if (pcl::io::loadPCDFile<PointT>(argv[pcd_file_indices[0]], *cloud1_full) <
+          0 ||
+      pcl::io::loadPCDFile<PointT>(argv[pcd_file_indices[1]], *cloud2_full) <
+          0) {
     pcl::console::print_error("Error loading input file!\n");
     return -1;
   }
-  std::cout << "loaded pointclouds of sizes: " << cloud1->size() << ", "
-            << cloud2->size() << std::endl;
+  std::cout << "loaded pointclouds of sizes: " << cloud1_full->size() << ", "
+            << cloud2_full->size() << std::endl;
 
   pcl::console::print_highlight("Downsampling to working resolution.\n");
   {
     pcl::ScopeTime t("downsampling");
-    cloud1 = downSample(cloud1, params.resolution);
-    cloud2 = downSample(cloud2, params.resolution);
+    cloud1 = downSample(cloud1_full, params.resolution);
+    cloud2 = downSample(cloud2_full, params.resolution);
   }
   std::cout << "downsampled clouds to: " << cloud1->size() << ", "
             << cloud2->size() << std::endl;
@@ -126,7 +129,7 @@ int main(int argc, char **argv)
   std::cout << "cross-matches count: " << correspondences->size() << std::endl;
   std::cout << "inliers count: " << inliers->size() << std::endl;
   std::cout << "MATCHING est score: "
-            << transformScore(cloud1, cloud2, transform,
+            << transformScore(cloud1_full, cloud2_full, transform,
                               params.max_correspondence_distance)
             << std::endl;
 
@@ -144,7 +147,7 @@ int main(int argc, char **argv)
   }
 
   std::cout << "SAC_IA est score: "
-            << transformScore(cloud1, cloud2, transform_ia,
+            << transformScore(cloud1_full, cloud2_full, transform_ia,
                               params.max_correspondence_distance)
             << std::endl;
 
@@ -160,7 +163,7 @@ int main(int argc, char **argv)
   }
 
   std::cout << "ICP est score: "
-            << transformScore(cloud1, cloud2, transform,
+            << transformScore(cloud1_full, cloud2_full, transform,
                               params.max_correspondence_distance)
             << std::endl;
   std::cout << "final transformation: " << std::endl << transform << std::endl;
