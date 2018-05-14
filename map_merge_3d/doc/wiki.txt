@@ -33,7 +33,7 @@ Estimating transforms between maps is cpu-intesive so you might want to tune `es
 {{{
 #!clearsilver CS/NodeAPI
 
-name = map_merge
+name = map_merge_node
 desc = Provides map merging services offered by this package. Dynamically looks for new robots in the system and merges their maps. Provides tf transforms.
 
 pub {
