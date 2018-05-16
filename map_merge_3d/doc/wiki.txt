@@ -5,13 +5,13 @@
 <<TOC(4)>>
 
 == Overview ==
-This package provides a 3D global map for multiple robots and the respective transformations between robots. It merges robots individual maps based on the overlapping space in the maps and requires no dependencies on a particular SLAM or communication between the robots.
+This package provides a 3D global map for multiple robots and the respective transformations between robots. It merges robots' individual maps based on the overlapping space in the maps and requires no dependencies on a particular SLAM or communication between the robots.
 
 {{attachment:screenshot.jpg||width="755px"}}
 
-The ROS node can merge maps from the arbitrary number of robots. It expects maps from individual robots as ROS topics and does impose any particular messaging between robots. If your run multiple robots under the same ROS master then {{{map_merge_3d}}} will probably work for you out-of-the-box, this makes it easy to setup a simulation experiment.
+The ROS node can merge maps from the arbitrary number of robots. It expects maps from individual robots as ROS topics and does not impose any particular messaging between robots. If your run multiple robots under the same ROS master then {{{map_merge_3d}}} may work for you out-of-the-box, this makes it easy to setup a simulation experiment.
 
-In the multi-robot exploration scenario your robots will probably run multiple ROS masters and you need to setup a communication between robots. Common solution might be [[multimaster_fkie]]. You need to provide maps from your robots on local topics (under the same master). Also if you want to distribute merged map and [[tf]] transformations back to robots your communication must take care of it.
+In the multi-robot exploration scenario your robots probably run multiple ROS masters and you need to setup a communication link between robots. Common solution might be [[multimaster_fkie]]. You need to provide maps from your robots on local topics (under the same master). Also if you want to distribute merged map and [[tf]] transformations back to robots your communication must take care of it.
 
 # TODO video
 
@@ -21,13 +21,13 @@ In the multi-robot exploration scenario your robots will probably run multiple R
 
 {{attachment:architecture.svg||width="755px"}}
 
-Recommended topics names for robot maps are `/robot1/map`, `/robot2/map` etc. However the names are configurable. All robots are expected to publish map under `<robot_namespace>/map`, where topic name (`map`) is configurable, but must be same for all robots. For each robot `<robot_namespace>` will be of cause different, but does not need to follow any pattern. Further, you can exclude some topics using `robot_namespace` parameter, to avoid merging unrelated pointclouds.
+Recommended topics names for robot maps are `/robot1/map`, `/robot2/map` etc. However the names are configurable. All robots are expected to publish map under `<robot_namespace>/map`, where topic name (`map`) is configurable, but must be the same for all robots. For each robot `<robot_namespace>` is of cause different, but it does not need to follow any pattern. Further, you can exclude some topics using `robot_namespace` parameter, to avoid merging unrelated pointclouds.
 
 == Estimation ==
 
 Transformations between maps are estimated by feature-matching algorithm and therefore it is required to have sufficient amount of overlapping space between maps to make a high-probability match. If maps don't have enough overlapping space to make a solid match, merger might reject those matches.
 
-Estimating transforms between maps is cpu-intesive so you might want to tune `estimation_rate` parameter to run re-estimation less often.
+Estimating transforms between maps is cpu-intesive so you might want to tune `estimation_rate` parameter to run the re-estimation less often.
 
 == ROS API ==
 {{{
@@ -44,7 +44,7 @@ pub {
 sub {
   0.name = <robot_namespace>/map
   0.type = sensor_msgs/PointCloud2
-  0.desc = Local map for specific robot.
+  0.desc = Local map for a specific robot.
 }
 
 param {
@@ -55,32 +55,32 @@ param {
     0.name = ~robot_map_topic
     0.default = `map`
     0.type = string
-    0.desc = Name of robot map topic without namespaces (last component of topic name). Only topics with this name will be considered when looking for new maps to merge. This topics may be subject to further filtering (see below).
+    0.desc = Name of robot map topic without namespaces (last component of the topic name). Only topics with this name are considered when looking for new maps to merge. This topics may be subject to further filtering (see below).
 
     1.name = ~robot_namespace
     1.default =  `<empty string>`
     1.type = string
-    1.desc = Fixed part of robot map topic. You can employ this parameter to further limit which topics will be considered during dynamic lookup for robots. Only topics which contain (anywhere) this string will be considered for lookup. Unlike `robot_map_topic` you are not limited by namespace logic. Topics will be filtered using text-based search. Therefore `robot_namespace` does not need to be ROS namespace, but can contain slashes etc. This must be common part of all robots map topics name (all robots for which you want to merge map).
+    1.desc = Fixed part of the robot map topic. You can employ this parameter to further limit which topics are considered during dynamic lookup for robots. Only topics which contain (anywhere) this string are considered for lookup. Unlike `robot_map_topic` you are not limited by namespace logic. Topics are filtered using text-based search. Therefore `robot_namespace` does not need to be a ROS namespace, but it can contain slashes etc. This string must be a common part of all maps topic name (all robots for which you want to merge map).
 
     2.name = ~merged_map_topic
     2.default = `map`
     2.type = string
-    2.desc = Topic name where merged map will be published.
+    2.desc = Topic name where merged map is published.
 
     3.name = ~world_frame
     3.default = `world`
     3.type = string
-    3.desc = Frame id (in [[tf]] tree) which will be assigned to published merged map and used as reference frame for tf transforms.
+    3.desc = Frame id (in [[tf]] tree) which is assigned to published merged map and used as reference frame for tf transforms.
 
     4.name = ~compositing_rate
     4.default = `0.3`
     4.type = double
-    4.desc = Rate in Hz. Basic frequency on which the node merges robots maps and publish merged map. Increase this value if you want faster updates.
+    4.desc = Rate in Hz. Basic frequency on which the node merges maps and publishes merged map. Increase this value if you want faster updates.
 
     5.name = ~discovery_rate
     5.default = `0.05`
     5.type = double
-    5.desc = Rate in Hz. Frequency on which this node discovers new robots (maps). Increase this value if you need more agile behaviour when adding new robots. Robots will be discovered sooner.
+    5.desc = Rate in Hz. Frequency on which this node discovers new robots (maps). Increase this value if you need more agile behaviour when adding new robots.
 
     6.name = ~estimation_rate
     6.default = `0.01`
@@ -90,7 +90,7 @@ param {
     7.name = ~publish_tf
     7.default = `true`
     7.type = bool
-    7.desc = Whether to publish estimated transforms in [[tf]] tree. See below.
+    7.desc = Whether to publish estimated transforms in the [[tf]] tree. See below.
   }
 
   group.1 {
@@ -100,7 +100,7 @@ param {
     0.name = ~resolution
     0.default = `0.1`
     0.type = double
-    0.desc = Resolution used for registration. Small values increase registration time.
+    0.desc = Resolution used for the registration. Small value increases registration time.
 
     1.name = ~descriptor_radius
     1.default = `resolution * 8.0`
@@ -110,7 +110,7 @@ param {
     2.name = ~outliers_min_neighbours
     2.default = `50`
     2.type = int
-    2.desc = Minimum number for neighbours for a point to be kept in the map during outliers pruning.
+    2.desc = Minimum number of neighbours for a point to be kept in the map during outliers pruning.
 
     3.name = ~normal_radius
     3.default = `resolution * 6.0`
@@ -125,7 +125,7 @@ param {
     5.name = ~keypoint_threshold
     5.default = `5.0`
     5.type = double
-    5.desc = Keypoints with lower response that this value will be pruned. Lower this threshold when using Harris keypoints (you can set `0.0`).
+    5.desc = Keypoints with lower response that this value are pruned. Lower this threshold when using Harris keypoints (you can set `0.0`).
 
     6.name = ~descriptor_type
     6.default = `PFH`
@@ -150,27 +150,27 @@ param {
     10.name = ~max_correspondence_distance
     10.default = `inlier_threshold * 2.0`
     10.type = double
-    10.desc = Maximum distance for a matched points to be considered the same point
+    10.desc = Maximum distance for matched points to be considered the same point.
 
     11.name = ~max_iterations
     11.default = `500`
     11.type = int
-    11.desc = maximum iterations for RANSAC
+    11.desc = Maximum iterations for RANSAC.
 
     12.name = ~matching_k
     12.default = `5`
     12.type = int
-    12.desc = number of nearest descriptors to consider for matching
+    12.desc = Number of the nearest descriptors to consider for matching.
 
     13.name = ~transform_epsilon
     13.default = `1e-2`
     13.type = double
-    13.desc = the smallest change allowed until ICP convergence.
+    13.desc = The smallest change allowed until ICP convergence.
 
     14.name = ~confidence_threshold
     14.default = `0.0`
     14.type = double
-    14.desc = Minimum confidence in the pair-wise transform estimate to be included in the transforms graph. Pair-wise transformations with lower confidence are not considered when computing global transforms. Increase this value if you are having problems with invalid transforms being estimated. The confidence value is computed as a reciprocal of Euclidean distance between transformed maps.
+    14.desc = Minimum confidence in the pair-wise transform estimate to be included in the map-merging graph. Pair-wise transformations with lower confidence are not considered when computing global transforms. Increase this value if you are having problems with invalid transforms being estimated. The confidence value is computed as a reciprocal of Euclidean distance between transformed maps.
 
     15.name = ~output_resolution
     15.default = `0.05`
@@ -182,7 +182,7 @@ param {
 prov_tf {
   0.from = world
   0.to   = mapX_frame
-  0.desc = Transformation from the world frame (which name can be configured using `world_frame` parameter) to each of the maps. Each map must have a correct `frame_id` set (instead `mapX_frame`) in the <<MsgLink(sensor_msgs/PointCloud2)>> message. If the transformation could not be estimated, null transformation will be published.
+  0.desc = Transformation from the world frame (which name can be configured using `world_frame` parameter) to each of the maps. Each map must have a correct `frame_id` set (instead `mapX_frame`) in the <<MsgLink(sensor_msgs/PointCloud2)>> message. If the transformation could not be estimated, null transformation is published.
 }
 }
 }}}
@@ -211,7 +211,7 @@ rosrun map_merge_3d map_merge_tool --descriptor_type SHOT map1.pcd map2.pcd map3
 
 === registration_visualisation ===
 
-Visualises pairwise transform estimation between 2 maps. Uses PCL visualiser for visualisation.
+Visualises pair-wise transform estimation between 2 maps. Uses PCL visualiser for the visualisation.
 
 ==== Usage ====
 
@@ -219,7 +219,7 @@ Visualises pairwise transform estimation between 2 maps. Uses PCL visualiser for
 rosrun map_merge_3d registration_visualisation [--param value] map1.pcd map2.pcd
 }}}
 
-After one step of estimation a visualisation window appears. You can freely navigate the pointcloud, save screenshot or camera parameters (press `h` to see all shortcuts). After the window is closed, estimation continues with the next phase and next visualisation window appears. Details about estimation progress are printed to `stdout`.
+After one step of the estimation a visualisation window appears. You can freely navigate the pointcloud, save a screenshot or camera parameters (press `h` to see all shortcuts). After the window is closed, estimation continues with the next phase and the next visualisation window appears. Details about estimation progress are printed to `stdout`.
 
 == Acknowledgements ==
 
