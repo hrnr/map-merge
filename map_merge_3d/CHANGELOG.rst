@@ -2,8 +2,8 @@
 Changelog for package map_merge_3d
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.1 (2018-05-17)
+------------------
 * workaround build issues in Debian Stretch and Ubuntu Artful
 * Contributors: Jiri Horner
 
