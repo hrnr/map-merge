@@ -4,6 +4,7 @@
 #include <map_merge_3d/map_merging.h>
 
 using Eigen::Matrix4f;
+using namespace map_merge_3d;
 
 TEST(estimateMapsTransforms, empty)
 {
