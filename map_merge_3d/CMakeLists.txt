@@ -11,6 +11,33 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(PCL REQUIRED COMPONENTS core features filters io registration visualization)
 
+# workaround issues on debian
+# see: https://github.com/ros-perception/perception_pcl/issues/139
+if(NOT "${PCL_LIBRARIES}" STREQUAL "")
+  list(REMOVE_ITEM PCL_LIBRARIES
+    "vtkGUISupportQt"
+    "vtkGUISupportQtOpenGL"
+    "vtkGUISupportQtSQL"
+    "vtkGUISupportQtWebkit"
+    "vtkViewsQt"
+    "vtkRenderingQt")
+endif()
+
+# There is a bug in the Ubuntu Artful (17.10) version of the VTK package,
+# where it includes /usr/include/*-linux-gnu/freetype2 in the include
+# directories (which doesn't exist).  This filters down to the PCL_INCLUDE_DIRS,
+# and causes downstream projects trying to use these libraries to fail to
+# configure properly.  Here we remove those bogus entries so that downstream
+# consumers of this package succeed.
+if(NOT "${PCL_INCLUDE_DIRS}" STREQUAL "")
+  foreach(item ${PCL_INCLUDE_DIRS})
+    string(REGEX MATCH "/usr/include/.*-linux-gnu/freetype2" item ${item})
+    if(item)
+      list(REMOVE_ITEM PCL_INCLUDE_DIRS ${item})
+    endif()
+  endforeach()
+endif()
+
 # C++14 is supported since ROS Melodic
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
