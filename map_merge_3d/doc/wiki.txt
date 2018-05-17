@@ -13,8 +13,6 @@ The ROS node can merge maps from the arbitrary number of robots. It expects maps
 
 In the multi-robot exploration scenario your robots probably run multiple ROS masters and you need to setup a communication link between robots. Common solution might be [[multimaster_fkie]]. You need to provide maps from your robots on local topics (under the same master). Also if you want to distribute merged map and [[tf]] transformations back to robots your communication must take care of it.
 
-# TODO video
-
 == Architecture ==
 
 {{{map_merge_3d}}} finds robot maps automatically and new robots can be added to the system at any time. 3D maps are expected as <<MsgLink(sensor_msgs/PointCloud2)>>, other map messages are not supported.
