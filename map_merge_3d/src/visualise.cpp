@@ -3,13 +3,19 @@
 #include <pcl/common/transforms.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+#define VISUALISE 1
+
 namespace map_merge_3d
 {
+
+#if VISUALISE
+
 // use just one instance of vis to overcome bug PCL #172
 static pcl::visualization::PCLVisualizer vis("cloud view");
 
 static void show()
 {
+  vis.setBackgroundColor(255, 255, 255);
   vis.spin();
   vis.removeCorrespondences();
   vis.removeAllPointClouds();
@@ -47,6 +53,8 @@ void visualiseNormals(PointCloudPtr cloud, SurfaceNormalsPtr normals)
   ColorHandlerT green(cloud, 0.0, 255.0, 0.0);
   vis.addPointCloud(cloud, green, "cloud");
   vis.addPointCloudNormals<PointT, NormalT>(cloud, normals, 5, 0.1f, "normals");
+  vis.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR,
+                                       1.0, 0.0, 0.0, "normals");
 
   show();
 }
@@ -93,5 +101,32 @@ void visualiseCorrespondences(PointCloudPtr cloud1, PointCloudPtr keypoints1,
 
   show();
 }
+
+#else
+
+void visualisePointClouds(PointCloudPtr cloud1, PointCloudPtr cloud2)
+{
+}
+void visualiseTransform(PointCloudPtr cloud1, PointCloudPtr cloud2,
+                        const Eigen::Matrix4f &transform)
+{
+}
+void visualiseCorrespondences(PointCloudPtr cloud1, PointCloudPtr keypoints1,
+                              PointCloudPtr cloud2, PointCloudPtr keypoints2,
+                              CorrespondencesPtr correspondences,
+                              bool show_keypoints)
+{
+}
+void visualisePointCloud(PointCloudPtr cloud)
+{
+}
+void visualiseNormals(PointCloudPtr cloud, SurfaceNormalsPtr normals)
+{
+}
+void visualiseKeypoints(PointCloudPtr cloud, PointCloudPtr keypoints)
+{
+}
+
+#endif
 
 }  // namespace map_merge_3d
