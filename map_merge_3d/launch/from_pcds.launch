@@ -5,11 +5,11 @@
 
   <include file="$(find map_merge_3d)/launch/map_merge.launch"/>
 
-  <node pkg="pcl_ros" type="pcd_to_pointcloud" name="robot1_publisher" args="$(arg pcd1) 2" output="screen">
+  <node pkg="pcl_ros" type="pcd_to_pointcloud" name="robot1_publisher" args="'$(arg pcd1)' 2" output="screen">
     <param name="frame_id" value="robot1"/>
     <remap from="cloud_pcd" to="/robot1/map"/>
   </node>
-  <node pkg="pcl_ros" type="pcd_to_pointcloud" name="robot2_publisher" args="$(arg pcd2) 2" output="screen">
+  <node pkg="pcl_ros" type="pcd_to_pointcloud" name="robot2_publisher" args="'$(arg pcd2)' 2" output="screen">
     <param name="frame_id" value="robot2"/>
     <remap from="cloud_pcd" to="/robot2/map"/>
   </node>
